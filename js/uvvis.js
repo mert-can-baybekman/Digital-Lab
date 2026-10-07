@@ -341,40 +341,86 @@ function initUVVisPlotly() {
     Plotly.newPlot('uvvis-plotly-chart', [], layout, config);
 }
 
+let uvvisChartTheme = 'dark'; // 'dark' | 'light'
+
+function setUVVisTheme(theme) {
+    uvvisChartTheme = theme;
+    const darkBtn = document.getElementById('uvvis-theme-dark-btn');
+    const lightBtn = document.getElementById('uvvis-theme-light-btn');
+    const chartContainer = document.getElementById('uvvis-chart-container-box');
+
+    if (theme === 'light') {
+        if (darkBtn) {
+            darkBtn.className = 'px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 text-slate-400 hover:text-slate-200';
+        }
+        if (lightBtn) {
+            lightBtn.className = 'px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 bg-white text-slate-900 shadow-sm font-semibold';
+        }
+        if (chartContainer) {
+            chartContainer.classList.add('bg-white', 'text-slate-900');
+            chartContainer.classList.remove('bg-slate-900/60');
+        }
+    } else {
+        if (darkBtn) {
+            darkBtn.className = 'px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 bg-slate-800 text-white shadow-sm font-semibold';
+        }
+        if (lightBtn) {
+            lightBtn.className = 'px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 text-slate-400 hover:text-slate-200';
+        }
+        if (chartContainer) {
+            chartContainer.classList.remove('bg-white', 'text-slate-900');
+            chartContainer.classList.add('bg-slate-900/60');
+        }
+    }
+    updateUVVisPlot();
+    if (typeof processAndPlotDegradation === 'function' && document.getElementById('uvvis-degradation-plotly-chart')) {
+        processAndPlotDegradation();
+    }
+}
+
 function getUVVisPlotlyLayout() {
     const invertX = document.getElementById('uvvis-invert-x')?.checked || false;
     const yMode = document.getElementById('uvvis-y-mode')?.value || 'raw';
+    const isLight = (uvvisChartTheme === 'light');
 
     let yAxisTitle = 'Absorbans (A)';
     if (yMode === 'absorbance_to_transmittance') yAxisTitle = 'Transmitans (%T)';
     else if (yMode === 'raw') yAxisTitle = 'Sinyal / Absorbans';
 
     return {
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(15, 23, 42, 0.65)',
+        paper_bgcolor: isLight ? '#ffffff' : 'rgba(0,0,0,0)',
+        plot_bgcolor: isLight ? '#ffffff' : 'rgba(15, 23, 42, 0.65)',
         margin: { l: 65, r: 35, t: 35, b: 65 },
         showlegend: true,
         legend: {
             x: 1,
             xanchor: 'right',
             y: 1,
-            font: { color: '#94a3b8', size: 11 },
-            bgcolor: 'rgba(30, 41, 59, 0.85)',
-            bordercolor: 'rgba(255, 255, 255, 0.1)',
+            font: { color: isLight ? '#0f172a' : '#94a3b8', size: 11, family: 'Inter' },
+            bgcolor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(30, 41, 59, 0.85)',
+            bordercolor: isLight ? '#cbd5e1' : 'rgba(255, 255, 255, 0.1)',
             borderwidth: 1
         },
         xaxis: {
-            title: { text: 'Dalga Boyu (Wavelength) [nm]', font: { color: '#cbd5e1', size: 13, family: 'Inter' } },
+            title: { text: 'Dalga Boyu (Wavelength) [nm]', font: { color: isLight ? '#0f172a' : '#cbd5e1', size: 13, family: 'Inter', weight: isLight ? 'bold' : 'normal' } },
             autorange: invertX ? 'reversed' : true,
-            gridcolor: 'rgba(51, 65, 85, 0.6)',
-            zerolinecolor: 'rgba(71, 85, 105, 0.8)',
-            tickfont: { color: '#94a3b8', family: 'Inter' }
+            gridcolor: isLight ? '#f1f5f9' : 'rgba(51, 65, 85, 0.6)',
+            zerolinecolor: isLight ? '#cbd5e1' : 'rgba(71, 85, 105, 0.8)',
+            tickfont: { color: isLight ? '#1e293b' : '#94a3b8', family: 'Inter' },
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1,
+            mirror: isLight
         },
         yaxis: {
-            title: { text: yAxisTitle, font: { color: '#cbd5e1', size: 13, family: 'Inter' } },
-            gridcolor: 'rgba(51, 65, 85, 0.6)',
-            zerolinecolor: 'rgba(71, 85, 105, 0.8)',
-            tickfont: { color: '#94a3b8', family: 'Inter' }
+            title: { text: yAxisTitle, font: { color: isLight ? '#0f172a' : '#cbd5e1', size: 13, family: 'Inter', weight: isLight ? 'bold' : 'normal' } },
+            gridcolor: isLight ? '#f1f5f9' : 'rgba(51, 65, 85, 0.6)',
+            zerolinecolor: isLight ? '#cbd5e1' : 'rgba(71, 85, 105, 0.8)',
+            tickfont: { color: isLight ? '#1e293b' : '#94a3b8', family: 'Inter' },
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1,
+            mirror: isLight
         },
         hovermode: 'x unified'
     };
@@ -383,6 +429,7 @@ function getUVVisPlotlyLayout() {
 function updateUVVisPlot() {
     const showPeaks = document.getElementById('uvvis-show-peaks')?.checked || false;
     const sensitivity = parseInt(document.getElementById('uvvis-peak-sensitivity')?.value || '5');
+    const isLight = (uvvisChartTheme === 'light');
     
     const plotlyTraces = [];
     const annotations = [];
@@ -413,9 +460,9 @@ function updateUVVisPlot() {
                     arrowhead: 2,
                     ax: 0,
                     ay: -25,
-                    arrowcolor: '#f59e0b',
-                    font: { size: 10, color: '#fcd34d', family: 'JetBrains Mono' },
-                    bgcolor: 'rgba(15, 23, 42, 0.85)',
+                    arrowcolor: isLight ? '#b45309' : '#f59e0b',
+                    font: { size: 10, color: isLight ? '#92400e' : '#fcd34d', family: 'JetBrains Mono', weight: 'bold' },
+                    bgcolor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(15, 23, 42, 0.85)',
                     bordercolor: '#f59e0b',
                     borderwidth: 1,
                     borderpad: 2
@@ -441,7 +488,7 @@ function updateUVVisPlot() {
     if (isDegradationOn && !isNaN(targetWl)) {
         annotations.push({
             x: targetWl,
-            y: (yMode === 'absorbance_to_transmittance') ? 10 : 0.85,
+            y: 0.85,
             xref: 'x',
             yref: 'y',
             text: `⚡ Bozunma Piki: ${targetWl} nm`,
@@ -450,8 +497,8 @@ function updateUVVisPlot() {
             ax: 0,
             ay: -35,
             arrowcolor: '#10b981',
-            font: { size: 11, color: '#34d399', family: 'Inter', weight: 'bold' },
-            bgcolor: 'rgba(6, 78, 59, 0.9)',
+            font: { size: 11, color: '#10b981', family: 'Inter', weight: 'bold' },
+            bgcolor: isLight ? 'rgba(236, 253, 245, 0.95)' : 'rgba(6, 78, 59, 0.9)',
             bordercolor: '#10b981',
             borderwidth: 1.5,
             borderpad: 4
@@ -484,25 +531,73 @@ function updateUVVisPlot() {
 }
 
 function findUVVisPeaks(xVals, yVals, sensitivity) {
-    const peaks = [];
-    const step = Math.max(1, Math.floor((11 - sensitivity) * 3));
+    const len = yVals.length;
+    if (len < 5) return [];
 
-    for (let i = step; i < yVals.length - step; i += 1) {
+    const minY = Math.min(...yVals);
+    const maxY = Math.max(...yVals);
+    const rangeY = maxY - minY;
+    if (rangeY <= 1e-4) return [];
+
+    // Gürültüyü hafifçe filtrelemek için 5 noktalı hareketli ortalama serisi
+    const smooth = new Array(len);
+    for (let i = 0; i < len; i++) {
+        let sum = 0, count = 0;
+        for (let j = -2; j <= 2; j++) {
+            const idx = i + j;
+            if (idx >= 0 && idx < len) {
+                sum += yVals[idx];
+                count++;
+            }
+        }
+        smooth[i] = sum / count;
+    }
+
+    const step = Math.max(3, Math.floor((12 - sensitivity) * 1.5));
+    const promThresh = rangeY * (0.14 - (sensitivity - 1) * 0.011);
+
+    const candidates = [];
+    for (let i = step; i < len - step; i++) {
         let isMax = true;
-
         for (let j = i - step; j <= i + step; j++) {
             if (j === i) continue;
-            if (yVals[j] >= yVals[i]) isMax = false;
+            if (smooth[j] >= smooth[i]) { isMax = false; break; }
+        }
+        if (!isMax) continue;
+
+        let leftBase = smooth[i], rightBase = smooth[i];
+        for (let j = i - 1; j >= 0; j--) {
+            if (smooth[j] < leftBase) leftBase = smooth[j];
+            if (smooth[j] > smooth[j + 1] && smooth[i] - leftBase >= promThresh) break;
+        }
+        for (let j = i + 1; j < len; j++) {
+            if (smooth[j] < rightBase) rightBase = smooth[j];
+            if (smooth[j] > smooth[j - 1] && smooth[i] - rightBase >= promThresh) break;
         }
 
-        if (isMax) {
-            const lastPeak = peaks[peaks.length - 1];
-            if (!lastPeak || Math.abs(xVals[i] - lastPeak.x) > 15) {
-                peaks.push({ x: xVals[i], y: yVals[i] });
+        const prominence = smooth[i] - Math.max(leftBase, rightBase);
+        if (prominence < promThresh) continue;
+
+        // Taban çizgisi gürültüsünü filtrele
+        if ((smooth[i] - minY) < promThresh * 0.8) continue;
+
+        candidates.push({ x: xVals[i], y: yVals[i], prominence, index: i });
+    }
+
+    const minSpacing = 15; // 15 nm
+    const filtered = [];
+    for (const c of candidates) {
+        const existingIdx = filtered.findIndex(p => Math.abs(p.x - c.x) < minSpacing);
+        if (existingIdx === -1) {
+            filtered.push(c);
+        } else {
+            if (c.prominence > filtered[existingIdx].prominence) {
+                filtered[existingIdx] = c;
             }
         }
     }
-    return peaks;
+
+    return filtered.sort((a, b) => a.x - b.x);
 }
 
 function getUVVisSpectralRegionHint(nm) {
@@ -833,6 +928,7 @@ function initUVVisDegradationPlotly() {
 
 function getUVVisDegradationPlotlyLayout() {
     const targetWl = document.getElementById('degradation-target-wavelength')?.value || '664';
+    const isLight = (uvvisChartTheme === 'light');
     let yTitle = `% Bozunma Verimi (% Degradation @ ${targetWl} nm)`;
     let yRange = [-5, 105];
 
@@ -845,31 +941,37 @@ function getUVVisDegradationPlotlyLayout() {
     }
 
     return {
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(15, 23, 42, 0.65)',
+        paper_bgcolor: isLight ? '#ffffff' : 'rgba(0,0,0,0)',
+        plot_bgcolor: isLight ? '#ffffff' : 'rgba(15, 23, 42, 0.65)',
         margin: { l: 65, r: 35, t: 35, b: 65 },
         showlegend: true,
         legend: {
             x: uvvisDegradationPlotMode === 'c_ratio' ? 0.98 : 0.02,
             xanchor: uvvisDegradationPlotMode === 'c_ratio' ? 'right' : 'left',
             y: 0.98,
-            font: { color: '#94a3b8', size: 11 },
-            bgcolor: 'rgba(30, 41, 59, 0.85)',
-            bordercolor: 'rgba(255, 255, 255, 0.1)',
+            font: { color: isLight ? '#0f172a' : '#94a3b8', size: 11, family: 'Inter' },
+            bgcolor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(30, 41, 59, 0.85)',
+            bordercolor: isLight ? '#cbd5e1' : 'rgba(255, 255, 255, 0.1)',
             borderwidth: 1
         },
         xaxis: {
-            title: { text: 'Işıma Süresi (Zaman, t) [dakika]', font: { color: '#cbd5e1', size: 13, family: 'Inter' } },
-            gridcolor: 'rgba(51, 65, 85, 0.6)',
-            zerolinecolor: 'rgba(71, 85, 105, 0.8)',
-            tickfont: { color: '#94a3b8', family: 'Inter' }
+            title: { text: 'Işıma Süresi (Zaman, t) [dakika]', font: { color: isLight ? '#0f172a' : '#cbd5e1', size: 13, family: 'Inter', weight: isLight ? 'bold' : 'normal' } },
+            gridcolor: isLight ? '#f1f5f9' : 'rgba(51, 65, 85, 0.6)',
+            zerolinecolor: isLight ? '#cbd5e1' : 'rgba(71, 85, 105, 0.8)',
+            tickfont: { color: isLight ? '#1e293b' : '#94a3b8', family: 'Inter' },
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1
         },
         yaxis: {
-            title: { text: yTitle, font: { color: '#a855f7', size: 13, family: 'Inter' } },
-            gridcolor: 'rgba(51, 65, 85, 0.6)',
-            zerolinecolor: 'rgba(71, 85, 105, 0.8)',
-            tickfont: { color: '#a855f7', family: 'Inter' },
-            range: yRange
+            title: { text: yTitle, font: { color: isLight ? '#7e22ce' : '#a855f7', size: 13, family: 'Inter', weight: isLight ? 'bold' : 'normal' } },
+            gridcolor: isLight ? '#f1f5f9' : 'rgba(51, 65, 85, 0.6)',
+            zerolinecolor: isLight ? '#cbd5e1' : 'rgba(71, 85, 105, 0.8)',
+            tickfont: { color: isLight ? '#7e22ce' : '#a855f7', family: 'Inter' },
+            range: yRange,
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1
         },
         hovermode: 'closest'
     };

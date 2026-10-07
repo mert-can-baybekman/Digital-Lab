@@ -83,6 +83,10 @@
                         <i data-lucide="sun" class="w-3.5 h-3.5 text-purple-400"></i>
                         <span>UV-Vis Maker</span>
                     </button>
+                    <button onclick="switchTab('fluorescence')" data-tab="fluorescence" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-400"></i>
+                        <span>Floresans Maker</span>
+                    </button>
                     <button onclick="switchTab('csv-converter')" data-tab="csv-converter" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i>
                         <span>CSV Dönüştürücü</span>
@@ -117,6 +121,9 @@
                 </button>
                 <button onclick="switchTab('uvvis')" data-tab="uvvis" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
                     <i data-lucide="sun" class="w-3.5 h-3.5 text-purple-400"></i> UV-Vis
+                </button>
+                <button onclick="switchTab('fluorescence')" data-tab="fluorescence" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-400"></i> Floresans
                 </button>
                 <button onclick="switchTab('csv-converter')" data-tab="csv-converter" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i> CSV Dönüştür
@@ -233,6 +240,43 @@
 
                     <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
                         <span class="text-xs text-purple-400 font-semibold flex items-center gap-1 group-hover:underline">
+                            <span>Modülü Başlat</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        </span>
+                    </div>
+                </article>
+
+                <!-- KART: Floresans Spektrum Maker -->
+                <article class="hub-tool-card glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer" onclick="switchTab('fluorescence')" data-keywords="floresans uyarılma emisyon excitation emission stokes cps lüminesans fotolüminesans spektrometre florofor">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="p-3 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                <i data-lucide="sparkles" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20">
+                                Fotolüminesans
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-bold text-white group-hover:text-rose-300 transition-colors flex items-center justify-between">
+                                <span>Floresans Spektrum Maker</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition text-rose-400"></i>
+                            </h3>
+                            <p class="text-slate-400 text-xs mt-2 leading-relaxed">
+                                Uyarılma (Excitation) ve Emisyon (Emission) spektrumlarını tek grafikte üst üste bindirin, Stokes kaymasını (Δλ, Δν, ΔE) hesaplayın ve yayın kalitesinde çift spektrum eğrileri üretin.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Excitation & Emission</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Stokes Kayması</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Tepe Eşitleme</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-xs text-rose-400 font-semibold flex items-center gap-1 group-hover:underline">
                             <span>Modülü Başlat</span>
                             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                         </span>
@@ -509,15 +553,27 @@
                 <!-- Sağ Grafik Alanı & Analiz Tablosu -->
                 <main class="lg:col-span-3 flex flex-col gap-5">
                     <!-- Plotly Grafik Kutusu -->
-                    <div class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg relative min-h-[500px] flex flex-col">
+                    <div id="ftir-chart-container-box" class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg relative min-h-[500px] flex flex-col transition-colors">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3 px-1 border-b border-slate-800/80 pb-3">
                             <h3 class="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
                                 <i data-lucide="line-chart" class="w-4 h-4 text-blue-400"></i>
                                 FTIR İnteraktif Spektrum Grafiği
                             </h3>
                             
-                            <!-- İndirme Butonları -->
-                            <div class="flex items-center gap-2">
+                            <!-- Kontrol & İndirme Butonları -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <!-- Tema Değiştirici: Karanlık / Aydınlık -->
+                                <div class="flex items-center bg-slate-900 border border-slate-700/80 rounded-lg p-0.5">
+                                    <button id="ftir-theme-dark-btn" onclick="setFTIRTheme('dark')" class="px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 bg-slate-800 text-white shadow-sm font-semibold" title="Karanlık Laboratuvar Teması">
+                                        <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400"></i>
+                                        <span>Karanlık</span>
+                                    </button>
+                                    <button id="ftir-theme-light-btn" onclick="setFTIRTheme('light')" class="px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 text-slate-400 hover:text-slate-200" title="Aydınlık / Yayın & Makale Teması (Beyaz)">
+                                        <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>
+                                        <span>Aydınlık</span>
+                                    </button>
+                                </div>
+
                                 <button onclick="downloadFTIRChart('png')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition shadow-sm">
                                     <i data-lucide="download" class="w-3.5 h-3.5"></i>
                                     <span>PNG</span>
@@ -871,7 +927,7 @@
                 <!-- Sağ Grafik Alanı & Analiz Tablosu -->
                 <main class="lg:col-span-3 flex flex-col gap-5">
                     <!-- Plotly Grafik Kutusu -->
-                    <div class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg relative min-h-[500px] flex flex-col">
+                    <div id="uvvis-chart-container-box" class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg relative min-h-[500px] flex flex-col transition-colors">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2 px-1 border-b border-slate-800/80 pb-3">
                             <div>
                                 <h3 class="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
@@ -881,8 +937,20 @@
                                 <div class="visible-spectrum-bar w-48 mt-1.5" title="Görünür Işık Tayfı (380 - 750 nm)"></div>
                             </div>
                             
-                            <!-- İndirme Butonları -->
-                            <div class="flex items-center gap-2">
+                            <!-- Kontrol & İndirme Butonları -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <!-- Tema Değiştirici: Karanlık / Aydınlık -->
+                                <div class="flex items-center bg-slate-900 border border-slate-700/80 rounded-lg p-0.5">
+                                    <button id="uvvis-theme-dark-btn" onclick="setUVVisTheme('dark')" class="px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 bg-slate-800 text-white shadow-sm font-semibold" title="Karanlık Laboratuvar Teması">
+                                        <i data-lucide="moon" class="w-3.5 h-3.5 text-purple-400"></i>
+                                        <span>Karanlık</span>
+                                    </button>
+                                    <button id="uvvis-theme-light-btn" onclick="setUVVisTheme('light')" class="px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 text-slate-400 hover:text-slate-200" title="Aydınlık / Yayın & Makale Teması (Beyaz)">
+                                        <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>
+                                        <span>Aydınlık</span>
+                                    </button>
+                                </div>
+
                                 <button onclick="downloadUVVisChart('png')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition shadow-sm">
                                     <i data-lucide="download" class="w-3.5 h-3.5"></i>
                                     <span>PNG</span>
@@ -1095,6 +1163,233 @@
                             </div>
                         </div>
 
+                    </div>
+                </main>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- TAB: FLORESANS SPEKTRUM ANALİZÖRÜ          -->
+        <!-- ========================================== -->
+        <section id="tab-fluorescence" class="tab-content space-y-6">
+            <!-- Üst Başlık -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-800/80">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-rose-600 rounded-xl shadow-md shadow-rose-600/20">
+                        <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight text-white">Floresans Spektrum Vizüalizörü</h2>
+                        <p class="text-xs text-slate-400">Fotolüminesans, Uyarılma (Excitation) & Emisyon (Emission) Spektroskopisi ve Stokes Kayması Analiz Stüdyosu</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Sol Kontrol Paneli -->
+                <aside class="lg:col-span-1 flex flex-col gap-4">
+                    <!-- Dosya Yükleme Alanı -->
+                    <div class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg">
+                        <h3 class="text-xs font-semibold text-slate-200 mb-2.5 flex items-center gap-2">
+                            <i data-lucide="upload-cloud" class="w-4 h-4 text-rose-400"></i>
+                            TXT / CSV Floresans Verisi Yükle
+                        </h3>
+                        
+                        <div id="fluorescence-drop-zone" class="border-2 border-dashed border-slate-700 rounded-xl p-4 text-center cursor-pointer hover:border-rose-500 hover:bg-slate-800/60 transition flex flex-col items-center justify-center">
+                            <i data-lucide="file-text" class="w-7 h-7 text-slate-400 mb-1.5"></i>
+                            <p class="text-xs text-slate-200 font-medium">Dosyaları buraya sürükleyin</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5">TXT, CSV, DAT cihaz çıktıları desteklenir</p>
+                            <input type="file" id="fluorescence-file-input" accept=".csv, .txt, .dat" multiple class="hidden">
+                        </div>
+
+                        <div class="mt-2.5 space-y-1.5">
+                            <button onclick="loadFluorescenceSampleDTBA()" class="w-full py-2 px-3 text-xs bg-slate-800 hover:bg-slate-700 text-rose-300 rounded-lg border border-slate-700 font-medium transition flex items-center justify-center gap-1.5">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-400"></i>
+                                <span>Örnek DTBA Spektrumu Yükle</span>
+                            </button>
+                            <button onclick="loadFluorescenceSampleMOF()" class="w-full py-1.5 px-3 text-xs bg-slate-800/70 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700/80 font-medium transition flex items-center justify-center gap-1.5">
+                                <i data-lucide="atom" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                <span>Örnek MOF Spektrumu Yükle</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Görünüm & İşleme Ayarları -->
+                    <div class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg flex flex-col gap-3.5">
+                        <h3 class="text-xs font-semibold text-slate-200 border-b border-slate-800 pb-2 flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i>
+                            Grafik & Ölçekleme Ayarları
+                        </h3>
+
+                        <!-- Normalizasyon / Ölçek Modu -->
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] text-slate-400">Şiddet (Y) Ölçekleme Modu</label>
+                            <select id="fluorescence-norm-mode" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:ring-1 focus:ring-rose-500 outline-none" onchange="processAndPlotFluorescenceData()">
+                                <option value="auto_scale" selected>Otomatik Zirve Eşitleme (Yayın Karşılaştırması)</option>
+                                <option value="raw">Orijinal Sayım Şiddeti (cps)</option>
+                                <option value="peak_normalize">Maksimuma Göre Normalize (%0 - 100)</option>
+                                <option value="min_max">Min-Max Normalizasyonu (0 - 1)</option>
+                            </select>
+                        </div>
+
+                        <!-- Gürültü Azaltma (Yumuşatma) -->
+                        <div class="flex flex-col gap-2 pt-2 border-t border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs text-slate-300 font-medium flex items-center gap-1.5 cursor-pointer" for="fluorescence-enable-smoothing">
+                                    <i data-lucide="waves" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                    Gürültü Azaltma (Yumuşatma)
+                                </label>
+                                <input type="checkbox" id="fluorescence-enable-smoothing" class="w-4 h-4 accent-cyan-500 rounded cursor-pointer" onchange="processAndPlotFluorescenceData()">
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] text-slate-400">Filtre Gücü:</span>
+                                <input type="range" id="fluorescence-smoothing-level" min="3" max="31" step="2" value="7" class="w-28 accent-cyan-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer" onchange="processAndPlotFluorescenceData()" oninput="document.getElementById('fl-smoothing-val').innerText = this.value">
+                                <span id="fl-smoothing-val" class="text-[10px] font-mono text-cyan-400 w-4 text-right">7</span>
+                            </div>
+                        </div>
+
+                        <!-- Şelale / Ofset -->
+                        <div class="flex flex-col gap-2 pt-2 border-t border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-slate-300 font-medium">Yığılma / Şelale Ofseti</span>
+                                <span id="fl-offset-val" class="text-[10px] font-mono text-rose-400">0%</span>
+                            </div>
+                            <input type="range" id="fluorescence-stack-offset" min="0" max="50" step="5" value="0" class="w-full accent-rose-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer" onchange="processAndPlotFluorescenceData()" oninput="document.getElementById('fl-offset-val').innerText = this.value + '%'">
+                        </div>
+
+                        <!-- Otomatik Pik Tespiti -->
+                        <div class="flex flex-col gap-2 pt-2 border-t border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs text-slate-300 font-medium flex items-center gap-1.5 cursor-pointer" for="fluorescence-show-peaks">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400"></i>
+                                    λmax Pik Etiketleri
+                                </label>
+                                <input type="checkbox" id="fluorescence-show-peaks" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer" onchange="updateFluorescencePlot()">
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] text-slate-400">Hassasiyet:</span>
+                                <input type="range" id="fluorescence-peak-sensitivity" min="1" max="10" value="5" class="w-28 accent-amber-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer" onchange="updateFluorescencePlot()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Yüklenen Floresans Spektrum Listesi -->
+                    <div class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg flex flex-col">
+                        <h3 class="text-xs font-semibold text-slate-200 border-b border-slate-800 pb-2 mb-2.5 flex items-center justify-between">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="layers" class="w-4 h-4 text-rose-400"></i>
+                                Spektrumlar (<span id="fluorescence-spectrum-count">0</span>)
+                            </span>
+                            <button onclick="clearAllFluorescenceSpectra()" class="text-[11px] text-red-400 hover:text-red-300 font-normal transition">Tümünü Sil</button>
+                        </h3>
+
+                        <div id="fluorescence-spectra-list" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                            <p class="text-xs text-slate-500 italic text-center py-4">Henüz floresans spektrumu yüklenmedi.</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Sağ Grafik Alanı & Analiz Kartları -->
+                <main class="lg:col-span-3 flex flex-col gap-5">
+                    <!-- Stokes Kayması Metrik Kartları -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="glass-panel p-3 rounded-xl border border-red-500/20 flex flex-col justify-between">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Uyarılma (Excitation) λmax</span>
+                            <div id="fl-metric-max-exc" class="text-lg font-extrabold text-red-400 font-mono mt-1">-</div>
+                        </div>
+                        <div class="glass-panel p-3 rounded-xl border border-blue-500/20 flex flex-col justify-between">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Emisyon (Emission) λmax</span>
+                            <div id="fl-metric-max-em" class="text-lg font-extrabold text-blue-400 font-mono mt-1">-</div>
+                        </div>
+                        <div class="glass-panel p-3 rounded-xl border border-emerald-500/20 flex flex-col justify-between">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Stokes Kayması (Δλ, Δν)</span>
+                            <div id="fl-metric-stokes-shift" class="text-sm font-extrabold text-emerald-400 font-mono mt-1">-</div>
+                        </div>
+                        <div class="glass-panel p-3 rounded-xl border border-amber-500/20 flex flex-col justify-between">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Enerji Kaybı (ΔE)</span>
+                            <div id="fl-metric-energy-loss" class="text-lg font-extrabold text-amber-400 font-mono mt-1">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Plotly Grafik Kutusu -->
+                    <div id="fluorescence-chart-container-box" class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg relative min-h-[500px] flex flex-col transition-colors">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2 px-1 border-b border-slate-800/80 pb-3">
+                            <div>
+                                <h3 class="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
+                                    <i data-lucide="sparkles" class="w-4 h-4 text-rose-400"></i>
+                                    Floresans Spektrum Grafiği (Uyarılma & Emisyon)
+                                </h3>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Excitation (Uyarılma) ve Emission (Emisyon) Çift Spektral Bindirme</p>
+                            </div>
+                            
+                            <!-- Kontrol & İndirme Butonları -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <!-- Tema Değiştirici -->
+                                <div class="flex items-center bg-slate-900 border border-slate-700/80 rounded-lg p-0.5">
+                                    <button id="fluorescence-theme-dark-btn" onclick="setFluorescenceTheme('dark')" class="px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 bg-slate-800 text-white shadow-sm font-semibold" title="Karanlık Laboratuvar Teması">
+                                        <i data-lucide="moon" class="w-3.5 h-3.5 text-rose-400"></i>
+                                        <span>Karanlık</span>
+                                    </button>
+                                    <button id="fluorescence-theme-light-btn" onclick="setFluorescenceTheme('light')" class="px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 text-slate-400 hover:text-slate-200" title="Aydınlık / Yayın & Makale Teması (Beyaz)">
+                                        <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>
+                                        <span>Aydınlık</span>
+                                    </button>
+                                </div>
+
+                                <button onclick="downloadFluorescenceChart('png')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition shadow-sm">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                    <span>PNG</span>
+                                </button>
+                                <button onclick="downloadFluorescenceChart('svg')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition">
+                                    <i data-lucide="file-code" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                    <span>SVG</span>
+                                </button>
+                                <button onclick="downloadFluorescenceChart('jpeg')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition">
+                                    <i data-lucide="image" class="w-3.5 h-3.5 text-amber-400"></i>
+                                    <span>JPG</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Grafik Konteyneri -->
+                        <div id="fluorescence-plotly-chart" class="w-full flex-1 min-h-[440px] rounded-lg"></div>
+                    </div>
+
+                    <!-- Algılanan Floresans Pik Noktaları Tablosu -->
+                    <div class="glass-panel p-4 rounded-xl border border-slate-800 shadow-lg">
+                        <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2.5">
+                            <h3 class="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
+                                <i data-lucide="table" class="w-4 h-4 text-amber-400"></i>
+                                Tespit Edilen Floresans Pikleri (λmax & Şiddet)
+                            </h3>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs text-slate-400 font-mono" id="fluorescence-detected-peak-count">0 pik</span>
+                                <button onclick="exportFluorescencePeaksCSV()" class="text-xs text-rose-400 hover:text-rose-300 font-medium flex items-center gap-1">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                    <span>CSV Olarak İndir</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-800 font-mono">
+                                        <th class="p-2">Spektrum Adı</th>
+                                        <th class="p-2">Spektral Tür</th>
+                                        <th class="p-2">Dalga Boyu (λmax) [nm]</th>
+                                        <th class="p-2">Şiddet (cps / a.u.)</th>
+                                        <th class="p-2">Belirginlik (Prominence)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fluorescence-peaks-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                                    <tr>
+                                        <td colspan="5" class="p-4 text-center text-slate-500 italic">Pik etiketlerini açarak otomatik tespit edilen pikleri inceleyin.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </main>
             </div>
@@ -1506,6 +1801,7 @@
     <script src="js/app.js"></script>
     <script src="js/ftir.js"></script>
     <script src="js/uvvis.js"></script>
+    <script src="js/fluorescence.js"></script>
     <script src="js/csv-converter.js"></script>
     <script src="js/xlsx-converter.js"></script>
     <script src="js/calculators.js"></script>

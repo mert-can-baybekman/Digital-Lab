@@ -210,40 +210,86 @@ function initFTIRPlotly() {
     Plotly.newPlot('ftir-plotly-chart', [], layout, config);
 }
 
+let ftirChartTheme = 'dark'; // 'dark' | 'light'
+
+function setFTIRTheme(theme) {
+    ftirChartTheme = theme;
+    const darkBtn = document.getElementById('ftir-theme-dark-btn');
+    const lightBtn = document.getElementById('ftir-theme-light-btn');
+    const chartContainer = document.getElementById('ftir-chart-container-box');
+
+    if (theme === 'light') {
+        if (darkBtn) {
+            darkBtn.className = 'px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 text-slate-400 hover:text-slate-200';
+        }
+        if (lightBtn) {
+            lightBtn.className = 'px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 bg-white text-slate-900 shadow-sm font-semibold';
+        }
+        if (chartContainer) {
+            chartContainer.classList.add('bg-white', 'text-slate-900');
+            chartContainer.classList.remove('bg-slate-900/60');
+        }
+    } else {
+        if (darkBtn) {
+            darkBtn.className = 'px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 bg-slate-800 text-white shadow-sm font-semibold';
+        }
+        if (lightBtn) {
+            lightBtn.className = 'px-2.5 py-1 text-xs rounded-md font-medium transition flex items-center gap-1 text-slate-400 hover:text-slate-200';
+        }
+        if (chartContainer) {
+            chartContainer.classList.remove('bg-white', 'text-slate-900');
+            chartContainer.classList.add('bg-slate-900/60');
+        }
+    }
+    updateFTIRPlot();
+    if (typeof processAndPlotKinetics === 'function' && document.getElementById('ftir-kinetics-plotly-chart')) {
+        processAndPlotKinetics();
+    }
+}
+
 function getFTIRPlotlyLayout() {
     const invertX = document.getElementById('ftir-invert-x')?.checked ?? true;
     const yMode = document.getElementById('ftir-y-mode')?.value || 'raw';
+    const isLight = (ftirChartTheme === 'light');
 
     let yAxisTitle = 'Şiddet / Sinyal';
     if (yMode === 'transmittance_to_absorbance') yAxisTitle = 'Absorbans (A)';
     else if (yMode === 'absorbance_to_transmittance') yAxisTitle = 'Transmitans (%T)';
 
     return {
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(15, 23, 42, 0.65)',
+        paper_bgcolor: isLight ? '#ffffff' : 'rgba(0,0,0,0)',
+        plot_bgcolor: isLight ? '#ffffff' : 'rgba(15, 23, 42, 0.65)',
         margin: { l: 65, r: 35, t: 35, b: 65 },
         showlegend: true,
         legend: {
             x: 1,
             xanchor: 'right',
             y: 1,
-            font: { color: '#94a3b8', size: 11 },
-            bgcolor: 'rgba(30, 41, 59, 0.85)',
-            bordercolor: 'rgba(255, 255, 255, 0.1)',
+            font: { color: isLight ? '#0f172a' : '#94a3b8', size: 11, family: 'Inter' },
+            bgcolor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(30, 41, 59, 0.85)',
+            bordercolor: isLight ? '#cbd5e1' : 'rgba(255, 255, 255, 0.1)',
             borderwidth: 1
         },
         xaxis: {
-            title: { text: 'Dalga Sayısı (Wavenumber) [cm⁻¹]', font: { color: '#cbd5e1', size: 13, family: 'Inter' } },
+            title: { text: 'Dalga Sayısı (Wavenumber) [cm⁻¹]', font: { color: isLight ? '#0f172a' : '#cbd5e1', size: 13, family: 'Inter', weight: isLight ? 'bold' : 'normal' } },
             autorange: invertX ? 'reversed' : true,
-            gridcolor: 'rgba(51, 65, 85, 0.6)',
-            zerolinecolor: 'rgba(71, 85, 105, 0.8)',
-            tickfont: { color: '#94a3b8', family: 'Inter' }
+            gridcolor: isLight ? '#f1f5f9' : 'rgba(51, 65, 85, 0.6)',
+            zerolinecolor: isLight ? '#cbd5e1' : 'rgba(71, 85, 105, 0.8)',
+            tickfont: { color: isLight ? '#1e293b' : '#94a3b8', family: 'Inter' },
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1,
+            mirror: isLight
         },
         yaxis: {
-            title: { text: yAxisTitle, font: { color: '#cbd5e1', size: 13, family: 'Inter' } },
-            gridcolor: 'rgba(51, 65, 85, 0.6)',
-            zerolinecolor: 'rgba(71, 85, 105, 0.8)',
-            tickfont: { color: '#94a3b8', family: 'Inter' }
+            title: { text: yAxisTitle, font: { color: isLight ? '#0f172a' : '#cbd5e1', size: 13, family: 'Inter', weight: isLight ? 'bold' : 'normal' } },
+            gridcolor: isLight ? '#f1f5f9' : 'rgba(51, 65, 85, 0.6)',
+            zerolinecolor: isLight ? '#cbd5e1' : 'rgba(71, 85, 105, 0.8)',
+            tickfont: { color: isLight ? '#1e293b' : '#94a3b8', family: 'Inter' },
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1,
+            mirror: isLight
         },
         hovermode: 'x unified'
     };
@@ -253,6 +299,7 @@ function updateFTIRPlot() {
     const showPeaks = document.getElementById('ftir-show-peaks')?.checked || false;
     const sensitivity = parseInt(document.getElementById('ftir-peak-sensitivity')?.value || '5');
     const yMode = document.getElementById('ftir-y-mode')?.value || 'raw';
+    const isLight = (ftirChartTheme === 'light');
     
     const plotlyTraces = [];
     const annotations = [];
@@ -284,10 +331,10 @@ function updateFTIRPlot() {
                     showarrow: true,
                     arrowhead: 2,
                     ax: 0,
-                    ay: isTMode ? 25 : -25,
-                    arrowcolor: '#f59e0b',
-                    font: { size: 10, color: '#fcd34d', family: 'JetBrains Mono' },
-                    bgcolor: 'rgba(15, 23, 42, 0.85)',
+                    ay: isTMode ? 26 : -26,
+                    arrowcolor: isLight ? '#b45309' : '#f59e0b',
+                    font: { size: 10, color: isLight ? '#92400e' : '#fcd34d', family: 'JetBrains Mono', weight: 'bold' },
+                    bgcolor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(15, 23, 42, 0.85)',
                     bordercolor: '#f59e0b',
                     borderwidth: 1,
                     borderpad: 2
@@ -321,8 +368,8 @@ function updateFTIRPlot() {
             ax: 0,
             ay: -35,
             arrowcolor: '#10b981',
-            font: { size: 11, color: '#34d399', family: 'Inter', weight: 'bold' },
-            bgcolor: 'rgba(6, 78, 59, 0.9)',
+            font: { size: 11, color: '#10b981', family: 'Inter', weight: 'bold' },
+            bgcolor: isLight ? 'rgba(236, 253, 245, 0.95)' : 'rgba(6, 78, 59, 0.9)',
             bordercolor: '#10b981',
             borderwidth: 1.5,
             borderpad: 4
@@ -356,31 +403,91 @@ function updateFTIRPlot() {
 }
 
 function findFTIRPeaks(xVals, yVals, sensitivity, isTMode = true) {
-    const peaks = [];
-    const step = Math.max(1, Math.floor((11 - sensitivity) * 2));
+    const len = yVals.length;
+    if (len < 5) return [];
 
-    for (let i = step; i < yVals.length - step; i += 1) {
-        let isExtreme = true;
+    const minY = Math.min(...yVals);
+    const maxY = Math.max(...yVals);
+    const rangeY = maxY - minY;
+    if (rangeY <= 1e-4) return [];
 
+    // Gürültüyü hafifçe filtrelemek için 5 noktalı hareketli ortalama serisi oluştur
+    const smooth = new Array(len);
+    for (let i = 0; i < len; i++) {
+        let sum = 0, count = 0;
+        for (let j = -2; j <= 2; j++) {
+            const idx = i + j;
+            if (idx >= 0 && idx < len) {
+                sum += yVals[idx];
+                count++;
+            }
+        }
+        smooth[i] = sum / count;
+    }
+
+    // Arama penceresi adımı (hassasiyet 1-10)
+    const step = Math.max(3, Math.floor((12 - sensitivity) * 1.5));
+    // Prominence (belirginlik/derinlik) eşiği: hassasiyet 5 için ~8.5%, 1 için ~14%, 10 için ~4.5%
+    const promThresh = rangeY * (0.15 - (sensitivity - 1) * 0.012);
+
+    const candidates = [];
+    for (let i = step; i < len - step; i++) {
+        let isExtremum = true;
         for (let j = i - step; j <= i + step; j++) {
             if (j === i) continue;
             if (isTMode) {
-                // Çukur (Minimum)
-                if (yVals[j] <= yVals[i]) isExtreme = false;
+                if (smooth[j] <= smooth[i]) { isExtremum = false; break; }
             } else {
-                // Tepe (Maksimum)
-                if (yVals[j] >= yVals[i]) isExtreme = false;
+                if (smooth[j] >= smooth[i]) { isExtremum = false; break; }
+            }
+        }
+        if (!isExtremum) continue;
+
+        // Yerel Prominence hesapla
+        let leftBase = smooth[i], rightBase = smooth[i];
+        for (let j = i - 1; j >= 0; j--) {
+            if (isTMode) {
+                if (smooth[j] > leftBase) leftBase = smooth[j];
+                if (smooth[j] < smooth[j + 1] && leftBase - smooth[i] >= promThresh) break;
+            } else {
+                if (smooth[j] < leftBase) leftBase = smooth[j];
+                if (smooth[j] > smooth[j + 1] && smooth[i] - leftBase >= promThresh) break;
+            }
+        }
+        for (let j = i + 1; j < len; j++) {
+            if (isTMode) {
+                if (smooth[j] > rightBase) rightBase = smooth[j];
+                if (smooth[j] < smooth[j - 1] && rightBase - smooth[i] >= promThresh) break;
+            } else {
+                if (smooth[j] < rightBase) rightBase = smooth[j];
+                if (smooth[j] > smooth[j - 1] && smooth[i] - rightBase >= promThresh) break;
             }
         }
 
-        if (isExtreme) {
-            const lastPeak = peaks[peaks.length - 1];
-            if (!lastPeak || Math.abs(xVals[i] - lastPeak.x) > 25) {
-                peaks.push({ x: xVals[i], y: yVals[i] });
+        const prominence = isTMode ? (Math.min(leftBase, rightBase) - smooth[i]) : (smooth[i] - Math.max(leftBase, rightBase));
+        if (prominence < promThresh) continue;
+
+        // Transmitans modunda taban çizgisine çok yakın (derinliği olmayan) dip gürültülerini engelle
+        if (isTMode && (maxY - smooth[i]) < promThresh) continue;
+
+        candidates.push({ x: xVals[i], y: yVals[i], prominence, index: i });
+    }
+
+    // 25 cm⁻¹ içerisindeki yakın pikleri filtrele, daha belirgin olanı seç
+    const minSpacing = 25;
+    const filtered = [];
+    for (const c of candidates) {
+        const existingIdx = filtered.findIndex(p => Math.abs(p.x - c.x) < minSpacing);
+        if (existingIdx === -1) {
+            filtered.push(c);
+        } else {
+            if (c.prominence > filtered[existingIdx].prominence) {
+                filtered[existingIdx] = c;
             }
         }
     }
-    return peaks;
+
+    return filtered.sort((a, b) => a.x - b.x);
 }
 
 function getFTIRFunctionalGroupHint(wavenumber) {
@@ -713,40 +820,50 @@ function initFTIRKineticsPlotly() {
 
 function getFTIRKineticsPlotlyLayout() {
     const targetWavenumber = document.getElementById('kinetics-target-wavenumber')?.value || '810';
+    const isLight = (ftirChartTheme === 'light');
 
     return {
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(15, 23, 42, 0.65)',
+        paper_bgcolor: isLight ? '#ffffff' : 'rgba(0,0,0,0)',
+        plot_bgcolor: isLight ? '#ffffff' : 'rgba(15, 23, 42, 0.65)',
         margin: { l: 65, r: 65, t: 40, b: 65 },
         showlegend: true,
         legend: {
             x: 0.02,
             y: 0.98,
-            font: { color: '#94a3b8', size: 11 },
-            bgcolor: 'rgba(30, 41, 59, 0.85)',
-            bordercolor: 'rgba(255, 255, 255, 0.1)',
+            font: { color: isLight ? '#0f172a' : '#94a3b8', size: 11, family: 'Inter' },
+            bgcolor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(30, 41, 59, 0.85)',
+            bordercolor: isLight ? '#cbd5e1' : 'rgba(255, 255, 255, 0.1)',
             borderwidth: 1
         },
         xaxis: {
-            title: { text: 'Reaksiyon Süresi (Zaman, t) [saniye]', font: { color: '#cbd5e1', size: 13, family: 'Inter' } },
-            gridcolor: 'rgba(51, 65, 85, 0.6)',
-            zerolinecolor: 'rgba(71, 85, 105, 0.8)',
-            tickfont: { color: '#94a3b8', family: 'Inter' }
+            title: { text: 'Reaksiyon Süresi (Zaman, t) [saniye]', font: { color: isLight ? '#0f172a' : '#cbd5e1', size: 13, family: 'Inter', weight: isLight ? 'bold' : 'normal' } },
+            gridcolor: isLight ? '#f1f5f9' : 'rgba(51, 65, 85, 0.6)',
+            zerolinecolor: isLight ? '#cbd5e1' : 'rgba(71, 85, 105, 0.8)',
+            tickfont: { color: isLight ? '#1e293b' : '#94a3b8', family: 'Inter' },
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1
         },
         yaxis: {
-            title: { text: `% Dönüşüm (% Conversion @ ${targetWavenumber} cm⁻¹)`, font: { color: '#10b981', size: 13, family: 'Inter' } },
-            gridcolor: 'rgba(51, 65, 85, 0.6)',
-            zerolinecolor: 'rgba(71, 85, 105, 0.8)',
-            tickfont: { color: '#10b981', family: 'Inter' },
-            range: [-5, 105]
+            title: { text: `% Dönüşüm (% Conversion @ ${targetWavenumber} cm⁻¹)`, font: { color: '#059669', size: 13, family: 'Inter', weight: 'bold' } },
+            gridcolor: isLight ? '#f1f5f9' : 'rgba(51, 65, 85, 0.6)',
+            zerolinecolor: isLight ? '#cbd5e1' : 'rgba(71, 85, 105, 0.8)',
+            tickfont: { color: '#059669', family: 'Inter' },
+            range: [-5, 105],
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1
         },
         yaxis2: {
-            title: { text: `Absorbans (A_t @ ${targetWavenumber} cm⁻¹)`, font: { color: '#38bdf8', size: 13, family: 'Inter' } },
+            title: { text: `Absorbans (A_t @ ${targetWavenumber} cm⁻¹)`, font: { color: '#0284c7', size: 13, family: 'Inter', weight: 'bold' } },
             overlaying: 'y',
             side: 'right',
             gridcolor: 'transparent',
-            tickfont: { color: '#38bdf8', family: 'Inter' },
-            showgrid: false
+            tickfont: { color: '#0284c7', family: 'Inter' },
+            showgrid: false,
+            showline: isLight,
+            linecolor: '#0f172a',
+            linewidth: isLight ? 1.5 : 1
         },
         hovermode: 'x unified'
     };

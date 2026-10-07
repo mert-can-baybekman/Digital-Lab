@@ -1,0 +1,10 @@
+# Floresans numune test veri dosyalari (kullanici istegi uzerine haric tutuldu)
+DTBADMSC.txt
+DTBAEXC.txt
+MOFC.txt
+MOFEXC.txt
+
+# Diger gecici yerel txt/veri dosyalari
+*.txt
+*.tmp
+.DS_Store

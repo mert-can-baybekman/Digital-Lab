@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Başlangıç modüllerini hazırla
     if (typeof initFTIRModule === 'function') initFTIRModule();
     if (typeof initUVVisModule === 'function') initUVVisModule();
+    if (typeof initFluorescenceModule === 'function') initFluorescenceModule();
     if (typeof initCSVConverterModule === 'function') initCSVConverterModule();
     if (typeof initXLSXConverterModule === 'function') initXLSXConverterModule();
     if (typeof initCalculatorsModule === 'function') initCalculatorsModule();
@@ -38,7 +39,7 @@ function initRouter() {
 }
 
 function switchTab(tabId, updateHash = true) {
-    const validTabs = ['hub', 'ftir', 'uvvis', 'csv-converter', 'xlsx-converter', 'calculators'];
+    const validTabs = ['hub', 'ftir', 'uvvis', 'fluorescence', 'csv-converter', 'xlsx-converter', 'calculators'];
     if (!validTabs.includes(tabId)) tabId = 'hub';
 
     DigitalLab.currentTab = tabId;
@@ -75,6 +76,8 @@ function switchTab(tabId, updateHash = true) {
             Plotly.Plots.resize('ftir-plotly-chart');
         } else if (tabId === 'uvvis' && document.getElementById('uvvis-plotly-chart')) {
             Plotly.Plots.resize('uvvis-plotly-chart');
+        } else if (tabId === 'fluorescence' && document.getElementById('fluorescence-plotly-chart')) {
+            Plotly.Plots.resize('fluorescence-plotly-chart');
         }
     }, 100);
 
@@ -177,6 +180,16 @@ function sendCSVToUVVis(csvContent, fileName) {
                 showToast(`Aktarım sırasında hata: ${err.message}`, 'error');
             }
         });
+    }, 150);
+}
+
+function sendCSVToFluorescence(csvContent, fileName) {
+    switchTab('fluorescence');
+    setTimeout(() => {
+        if (typeof parseFluorescenceText === 'function') {
+            parseFluorescenceText(csvContent, fileName || 'Donusturulmus_Veri.csv');
+            showToast(`"${fileName}" doğrudan Floresans Analizörüne aktarıldı!`, 'success');
+        }
     }, 150);
 }
 

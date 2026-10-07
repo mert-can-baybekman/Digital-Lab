@@ -44,23 +44,42 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 
 ---
 
-### 3. 🔄 Çoklu CSV Karakter & Ayırıcı Dönüştürücü
+### 3. ✨ Floresans Spektrum Maker & Stokes Kayması Analizörü
+- **Uyarılma (Excitation) & Emisyon (Emission) Çift Spektral Bindirme:**
+  - TXT, CSV ve DAT cihaz çıktılarını (Horiba, PTI, Edinburgh vb.) otomatik algılama ve başlık ayıklama.
+  - Excitation ve Emission eğrilerini OriginLab standardında (Kırmızı & Mavi/Siyah) tek grafik ekseninde bir araya getirme.
+- **Otomatik Zirve Eşitleme & Normalizasyon:**
+  - Excitation lamba profili ve emisyon dedektör sayım farklarını eşitleyen "Otomatik Zirve Eşitleme (Auto-Scale)" modu.
+  - %0-100 Maksimuma göre normalize ve 0-1 Min-Max ölçekleme.
+  - Her numune için bağımsız çarpan (0.1x, 1x, 10x) ve şelale ofseti.
+- **⚡ Otomatik Stokes Kayması (Stokes Shift) Analizörü:**
+  - $\Delta\lambda = \lambda_{\text{em}}^{\max} - \lambda_{\text{exc}}^{\max}$ (nm),
+  - Enerji bazlı dalga sayısı kayması $\Delta\bar{\nu} = (1/\lambda_{\text{exc}} - 1/\lambda_{\text{em}}) \times 10^7\text{ cm}^{-1}$,
+  - Foton enerji kaybı $\Delta E = 1239.84 \times (1/\lambda_{\text{exc}} - 1/\lambda_{\text{em}})\text{ eV}$ otomatik hesaplama ve metrik kartları.
+- **Akıllı Pik Tespiti:**
+  - Taban gürültüsünü filtreleyen *prominence* (belirginlik) tabanlı $\lambda_{\max}$ tespiti.
+- **Karanlık / Aydınlık (OriginLab / Makale Beyazı) Grafik Teması:**
+  - Tek tıkla akademik makale standardında beyaz zemin, siyah çerçeve ve yüksek kontrastlı grafik görünümüne geçiş ve yüksek çözünürlüklü dışa aktarma (PNG, SVG, JPG, CSV).
+
+---
+
+### 4. 🔄 Çoklu CSV Karakter & Ayırıcı Dönüştürücü
 - **Türkçe/Avrupa Cihaz Formatı Dönüşümü:**
   - Noktalı virgül (`;`) ayırıcılarını virgüle (`,`),
   - Ondalık virgül (`,`) karakterlerini noktaya (`.`) dönüştürür.
 - **Canlı Karşılaştırmalı Önizleme:** Dosyayı indirmeden önce "Orijinal vs Dönüştürülmüş" satırlarını yan yana inceleme.
-- **⚡ Doğrudan Laboratuvara Aktar (Pipeline):** Dönüştürülen dosyayı kaydetmeden tek tıkla **FTIR** veya **UV-Vis** analizörüne aktarma.
+- **⚡ Doğrudan Laboratuvara Aktar (Pipeline):** Dönüştürülen dosyayı kaydetmeden tek tıkla **FTIR**, **UV-Vis** veya **Floresans** analizörüne aktarma.
 - **Toplu İndirme:** Dosyaları tek tek veya tek bir **.ZIP** arşivi olarak indirme.
 
 ---
 
-### 4. 📊 CSV ➔ Excel (.xlsx) Dönüştürücü
+### 5. 📊 CSV ➔ Excel (.xlsx) Dönüştürücü
 - Laboratuvar CSV/TXT dosyalarını biçimlendirilmiş gerçek Excel dosyalarına çevirme (SheetJS).
 - Çoklu dosyaları tek bir Excel çalışma kitabında **farklı sekmeler (sheets)** olarak birleştirme veya toplu ZIP indirme.
 
 ---
 
-### 5. 🧮 Bilimsel Hesaplayıcılar & Referans Kütüphanesi
+### 6. 🧮 Bilimsel Hesaplayıcılar & Referans Kütüphanesi
 - **Beer-Lambert Kanunu Hesaplayıcısı ($A = \varepsilon \cdot b \cdot c$):** Absorbans, Konsantrasyon, Molar Absorptivite veya Küvet Işık Yolu hesaplama.
 - **Doğrusal Regresyon & Kalibrasyon Eğrisi Analizi:** Standart veri setlerinden eğim, kesim noktası ve $R^2$ korelasyonunu hesaplama, bilinmeyen numune konsantrasyonunu bulma ve interaktif regresyon grafiği.
 - **Spektroskopi Birim Dönüştürücüsü:** Dalga boyu ($\text{nm}$) $\longleftrightarrow$ Dalga sayısı ($\text{cm}^{-1}$) $\longleftrightarrow$ Frekans ($\text{THz}$) $\longleftrightarrow$ Foton Enerjisi ($\text{eV}$) $\longleftrightarrow$ Molar Enerji ($\text{kJ/mol}$).
