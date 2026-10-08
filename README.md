@@ -66,7 +66,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 ### 4. 📈 XRDML Difraktogram Analizörü & Excel Dışa Aktarımı
 - Bir veya daha fazla XRDML dosyasındaki birden çok taramayı ayrıştırma; bozuk veya desteklenmeyen taramalar için anlaşılır hata bildirimi.
 - Taramaları aynı interaktif Plotly grafiğinde görüntüleme ve her taramanın görünürlüğünü ayrı ayrı kontrol etme.
-- Hassasiyet ayarlı prominence tabanlı pik tespiti; pik konumu, bağıl şiddet, belirginlik ve FWHM analizi.
+- Hassasiyet ayarlı, sinyal gürültüsüne uyarlanan prominence tabanlı pik tespiti; grafikte kontrastlı pik işaretleri ile pik konumu, bağıl şiddet, belirginlik ve FWHM analizi.
 - XRDML'de dalga boyu bilgisi bulunduğunda Bragg yasası ile d-aralığı hesabı; pik sonuçlarını CSV olarak indirme.
 - Her taramayı ve birleştirilmiş pik özetini ayrı sayfalara koyan çok sekmeli Excel (.xlsx) çalışma kitabı oluşturma.
 - XML verileri tarayıcıda işlenir; dosyalar sunucuya gönderilmez.

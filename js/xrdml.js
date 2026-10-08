@@ -358,7 +358,7 @@ function updateXRDMLPlot() {
                 mode: 'markers',
                 name: `${scan.label} pikleri`,
                 showlegend: false,
-                marker: { color: colors[index % colors.length], size: 8, symbol: 'diamond', line: { color: '#fff', width: 1 } },
+                marker: { color: '#facc15', size: 10, symbol: 'diamond', line: { color: '#0f172a', width: 1.5 } },
                 hovertemplate: 'Konum: %{x:.4f}<br>Şiddet: %{y:.2f}<br>d-aralığı: %{customdata[0]}<br>FWHM: %{customdata[1]}<br>Belirginlik: %{customdata[2]}<extra>%{fullData.name}</extra>'
             });
         }
@@ -368,7 +368,7 @@ function updateXRDMLPlot() {
         .slice()
         .sort((a, b) => b.prominence - a.prominence)
         .slice(0, 12)
-        .forEach(peak => annotations.push({
+        .forEach((peak, index) => annotations.push({
             x: peak.x,
             y: peak.y,
             xref: 'x',
@@ -377,12 +377,12 @@ function updateXRDMLPlot() {
             showarrow: true,
             arrowhead: 2,
             ax: 0,
-            ay: -24,
-            arrowcolor: '#f59e0b',
-            font: { size: 9, color: '#fcd34d', family: 'JetBrains Mono', weight: 'bold' },
+            ay: -28 - (index % 3) * 16,
+            arrowcolor: '#facc15',
+            font: { size: 10, color: '#fde68a', family: 'JetBrains Mono', weight: 'bold' },
             bgcolor: 'rgba(15, 23, 42, 0.85)',
-            bordercolor: '#f59e0b',
-            borderwidth: 1,
+            bordercolor: '#facc15',
+            borderwidth: 1.5,
             borderpad: 2
         }));
 
@@ -398,6 +398,8 @@ function updateXRDMLPlot() {
     Plotly.react(chart, traces, layout)
         .catch(error => showToast(`XRD grafiği güncellenemedi: ${error.message}`, 'error'));
     updateXRDMLPeaksTable(tablePeaks, showPeaks);
+    const peakCount = document.getElementById('xrdml-detected-peak-count');
+    if (peakCount) peakCount.textContent = `${tablePeaks.length} pik`;
 }
 
 function findXRDMLPeaks(xValues, yValues, sensitivity = 5) {
@@ -427,7 +429,12 @@ function findXRDMLPeaks(xValues, yValues, sensitivity = 5) {
     });
 
     const clampedSensitivity = Math.min(10, Math.max(1, Number(sensitivity) || 5));
-    const prominenceThreshold = signalRange * (0.12 - (clampedSensitivity - 1) * 0.011);
+    const residuals = y.map((value, index) => value - smooth[index]);
+    const residualMedian = medianXRDMLValue(residuals);
+    const noiseSigma = 1.4826 * medianXRDMLValue(residuals.map(value => Math.abs(value - residualMedian)));
+    const relativeThreshold = signalRange * (0.12 - (clampedSensitivity - 1) * 0.011);
+    const noiseMultiplier = 4.2 - ((clampedSensitivity - 1) / 9) * 1.2;
+    const prominenceThreshold = Math.max(relativeThreshold, noiseSigma * noiseMultiplier);
     const candidates = [];
     for (let index = 1; index < length - 1; index++) {
         if (smooth[index] < smooth[index - 1] || smooth[index] <= smooth[index + 1]) continue;
@@ -463,6 +470,13 @@ function findXRDMLPeaks(xValues, yValues, sensitivity = 5) {
         if (!filtered.some(peak => Math.abs(peak.index - candidate.index) < minSpacing)) filtered.push(candidate);
     });
     return filtered.sort((a, b) => a.x - b.x);
+}
+
+function medianXRDMLValue(values) {
+    if (!values.length) return 0;
+    const sorted = values.slice().sort((a, b) => a - b);
+    const middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
 function findXRDMLPeakIndex(values, index) {
