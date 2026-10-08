@@ -644,7 +644,7 @@
                                 <i data-lucide="table" class="w-4 h-4 text-amber-400"></i>
                                 Algılanan Karakteristik Emilim / İletim Pik Noktaları
                             </h3>
-                            <div class="flex items-center gap-3">
+                            <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                                 <span class="text-xs text-slate-400 font-mono" id="ftir-detected-peak-count">0 pik</span>
                                 <button onclick="exportFTIRPeaksCSV()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1">
                                     <i data-lucide="download" class="w-3.5 h-3.5"></i>
@@ -1577,12 +1577,56 @@
                             <h3 class="text-sm font-semibold text-slate-200">XRD Difraktogramı</h3>
                             <p id="xrdml-chart-caption" class="text-[10px] text-slate-500 mt-1">Yüklenen taramalar aynı grafikte gösterilir.</p>
                         </div>
-                        <span id="xrdml-scan-count" class="text-[10px] bg-slate-800 text-orange-300 border border-slate-700 px-2 py-0.5 rounded-full font-mono">0 tarama</span>
+                        <div class="flex items-center gap-3">
+                            <label class="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer" for="xrdml-show-peaks">
+                                <input type="checkbox" id="xrdml-show-peaks" checked class="w-3.5 h-3.5 accent-amber-500 rounded cursor-pointer" onchange="updateXRDMLPlot()">
+                                Pik etiketleri
+                            </label>
+                            <label class="flex items-center gap-2 text-[10px] text-slate-400" for="xrdml-peak-sensitivity">
+                                Hassasiyet
+                                <input type="range" id="xrdml-peak-sensitivity" min="1" max="10" value="5" class="w-20 accent-amber-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer" onchange="updateXRDMLPlot()" oninput="document.getElementById('xrdml-sensitivity-value').textContent = this.value">
+                                <span id="xrdml-sensitivity-value" class="font-mono text-amber-300 w-3">5</span>
+                            </label>
+                            <span id="xrdml-scan-count" class="text-[10px] bg-slate-800 text-orange-300 border border-slate-700 px-2 py-0.5 rounded-full font-mono">0 tarama</span>
+                        </div>
                     </div>
-                    <div id="xrdml-plotly-chart" class="w-full flex-1 min-h-[420px] rounded-lg"></div>
+                    <div id="xrdml-plotly-chart" class="w-full flex-1 min-h-[360px] rounded-lg"></div>
+
+                    <div class="border-t border-slate-800 pt-4 mt-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div>
+                                <h3 class="text-xs font-semibold text-slate-200">Otomatik XRD Pik Analizi</h3>
+                                <p class="text-[10px] text-slate-500 mt-1">Pik konumu, d-aralığı, bağıl şiddet, belirginlik ve FWHM</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="xrdml-detected-peak-count" class="text-[10px] text-slate-400 font-mono">0 pik</span>
+                                <button onclick="exportXRDMLPeaksCSV()" class="py-1.5 px-2.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center gap-1">
+                                    <i data-lucide="download" class="w-3 h-3"></i> Pik CSV
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto max-h-72">
+                            <table class="w-full text-left text-[10px] min-w-[700px]">
+                                <thead class="text-slate-400 bg-slate-900/60 sticky top-0">
+                                    <tr>
+                                        <th class="p-2 font-medium">Tarama</th>
+                                        <th class="p-2 font-medium">2θ / Konum</th>
+                                        <th class="p-2 font-medium">d (Å)</th>
+                                        <th class="p-2 font-medium">Şiddet</th>
+                                        <th class="p-2 font-medium">Bağıl (%)</th>
+                                        <th class="p-2 font-medium">FWHM</th>
+                                        <th class="p-2 font-medium">Belirginlik</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="xrdml-peaks-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                                    <tr><td colspan="7" class="p-4 text-center text-slate-500 italic">Pik analizi için XRDML dosyası yükleyin.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <p class="text-[10px] text-slate-500">XRDML XML verileri tarayıcınızda ayrıştırılır; dosyalar sunucuya gönderilmez. Excel çalışma kitabında her tarama ayrı bir sayfaya yazılır.</p>
+            <p class="text-[10px] text-slate-500">XRDML XML verileri tarayıcınızda ayrıştırılır; dosyalar sunucuya gönderilmez. Excel çalışma kitabında her tarama ve pik özeti ayrı sayfalara yazılır. d-aralığı için ölçümde dalga boyu bilgisi bulunmalıdır.</p>
         </section>
 
         <!-- ========================================== -->

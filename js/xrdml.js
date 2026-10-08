@@ -58,6 +58,17 @@ function xrdmlNumber(text) {
     return Number.isFinite(value) ? value : null;
 }
 
+function xrdmlWavelengthAngstrom(measurement) {
+    const wavelengthNode = xrdmlDescendants(measurement, 'kalpha1')[0]
+        || xrdmlDescendants(measurement, 'wavelength')[0];
+    if (!wavelengthNode) return null;
+
+    const value = xrdmlNumber(wavelengthNode.textContent);
+    if (value === null || value <= 0) return null;
+    const unit = (wavelengthNode.getAttribute('unit') || '').toLowerCase();
+    return unit === 'nm' || unit === 'nanometer' || unit === 'nanometers' ? value * 10 : value;
+}
+
 function xrdmlText(element, name) {
     const child = xrdmlDescendants(element, name)[0];
     return child ? child.textContent.trim() : '';
@@ -84,9 +95,10 @@ function parseXRDML(xmlText, fileName) {
     const warnings = [];
     let scanNumber = 0;
 
-    measurements.forEach((measurement, measurementIndex) => {
+    measurements.forEach(measurement => {
         const sample = xrdmlDescendants(measurement, 'sample')[0];
         const sampleName = sample ? xrdmlText(sample, 'name') : '';
+        const wavelengthAngstrom = xrdmlWavelengthAngstrom(measurement);
         xrdmlDescendants(measurement, 'scan').forEach(scan => {
             scanNumber++;
             try {
@@ -128,9 +140,9 @@ function parseXRDML(xmlText, fileName) {
 
                 scans.push({
                     label: scanLabel,
-                    measurementIndex,
                     scanNumber,
                     sampleName,
+                    wavelengthAngstrom,
                     axisLabel,
                     x: positions,
                     y: intensities,
@@ -304,15 +316,75 @@ function updateXRDMLPlot() {
 
     const colors = ['#f97316', '#38bdf8', '#34d399', '#f472b6', '#a78bfa', '#facc15', '#2dd4bf', '#fb7185'];
     const visibleScans = xrdmlFiles.flatMap(file => file.scans).filter(scan => scan.visible);
-    const traces = visibleScans.map((scan, index) => ({
-        x: scan.x,
-        y: scan.y,
-        type: 'scatter',
-        mode: 'lines',
-        name: scan.label,
-        line: { color: colors[index % colors.length], width: 1.6 },
-        hovertemplate: '%{x:.4f}<br>%{y:.4f} counts<extra>%{fullData.name}</extra>'
-    }));
+    const showPeaks = document.getElementById('xrdml-show-peaks')?.checked !== false;
+    const sensitivity = Number(document.getElementById('xrdml-peak-sensitivity')?.value || 5);
+    const traces = [];
+    const annotations = [];
+    const tablePeaks = [];
+
+    visibleScans.forEach((scan, index) => {
+        traces.push({
+            x: scan.x,
+            y: scan.y,
+            type: 'scatter',
+            mode: 'lines',
+            name: scan.label,
+            line: { color: colors[index % colors.length], width: 1.6 },
+            hovertemplate: '%{x:.4f}<br>%{y:.4f} counts<extra>%{fullData.name}</extra>'
+        });
+
+        if (!showPeaks) return;
+        const peaks = findXRDMLPeaks(scan.x, scan.y, sensitivity);
+        const maxIntensity = getXRDMLMaxIntensity(scan.y);
+        const scanPeaks = peaks.map(peak => ({
+            ...peak,
+            scanName: scan.label,
+            axisLabel: scan.axisLabel,
+            relativeIntensity: maxIntensity > 0 ? Math.max(0, peak.y / maxIntensity * 100) : 0,
+            dSpacing: calculateXRDMLDSpacing(scan, peak.x)
+        }));
+        tablePeaks.push(...scanPeaks);
+
+        if (scanPeaks.length) {
+            traces.push({
+                x: scanPeaks.map(peak => peak.x),
+                y: scanPeaks.map(peak => peak.y),
+                customdata: scanPeaks.map(peak => [
+                    peak.dSpacing === null ? '—' : `${peak.dSpacing.toFixed(4)} Å`,
+                    peak.fwhm === null ? '—' : peak.fwhm.toFixed(4),
+                    peak.prominence.toFixed(2)
+                ]),
+                type: 'scatter',
+                mode: 'markers',
+                name: `${scan.label} pikleri`,
+                showlegend: false,
+                marker: { color: colors[index % colors.length], size: 8, symbol: 'diamond', line: { color: '#fff', width: 1 } },
+                hovertemplate: 'Konum: %{x:.4f}<br>Şiddet: %{y:.2f}<br>d-aralığı: %{customdata[0]}<br>FWHM: %{customdata[1]}<br>Belirginlik: %{customdata[2]}<extra>%{fullData.name}</extra>'
+            });
+        }
+    });
+
+    tablePeaks
+        .slice()
+        .sort((a, b) => b.prominence - a.prominence)
+        .slice(0, 12)
+        .forEach(peak => annotations.push({
+            x: peak.x,
+            y: peak.y,
+            xref: 'x',
+            yref: 'y',
+            text: peak.x.toFixed(2),
+            showarrow: true,
+            arrowhead: 2,
+            ax: 0,
+            ay: -24,
+            arrowcolor: '#f59e0b',
+            font: { size: 9, color: '#fcd34d', family: 'JetBrains Mono', weight: 'bold' },
+            bgcolor: 'rgba(15, 23, 42, 0.85)',
+            bordercolor: '#f59e0b',
+            borderwidth: 1,
+            borderpad: 2
+        }));
 
     const axes = Array.from(new Set(visibleScans.map(scan => scan.axisLabel)));
     const xAxisTitle = axes.length === 1 ? axes[0] : 'Konum';
@@ -321,8 +393,198 @@ function updateXRDMLPlot() {
         ? 'Farklı eksen türleri aynı grafikte gösteriliyor.'
         : 'Yüklenen taramalar aynı grafikte gösterilir.';
 
-    Plotly.react(chart, traces, getXRDMLLayout(xAxisTitle))
+    const layout = getXRDMLLayout(xAxisTitle);
+    layout.annotations = annotations;
+    Plotly.react(chart, traces, layout)
         .catch(error => showToast(`XRD grafiği güncellenemedi: ${error.message}`, 'error'));
+    updateXRDMLPeaksTable(tablePeaks, showPeaks);
+}
+
+function findXRDMLPeaks(xValues, yValues, sensitivity = 5) {
+    const length = Math.min(xValues.length, yValues.length);
+    if (length < 5) return [];
+
+    const x = xValues.slice(0, length);
+    const y = yValues.slice(0, length);
+    if (x.some(value => !Number.isFinite(value)) || y.some(value => !Number.isFinite(value))) return [];
+
+    const minY = y.reduce((minimum, value) => Math.min(minimum, value), Infinity);
+    const maxY = y.reduce((maximum, value) => Math.max(maximum, value), -Infinity);
+    const signalRange = maxY - minY;
+    if (!(signalRange > 0)) return [];
+
+    const smooth = y.map((value, index) => {
+        let weightedSum = 0;
+        let weightTotal = 0;
+        for (let offset = -2; offset <= 2; offset++) {
+            const sample = index + offset;
+            if (sample < 0 || sample >= length) continue;
+            const weight = 3 - Math.abs(offset);
+            weightedSum += y[sample] * weight;
+            weightTotal += weight;
+        }
+        return weightedSum / weightTotal;
+    });
+
+    const clampedSensitivity = Math.min(10, Math.max(1, Number(sensitivity) || 5));
+    const prominenceThreshold = signalRange * (0.12 - (clampedSensitivity - 1) * 0.011);
+    const candidates = [];
+    for (let index = 1; index < length - 1; index++) {
+        if (smooth[index] < smooth[index - 1] || smooth[index] <= smooth[index + 1]) continue;
+
+        const height = smooth[index];
+        let leftMinimum = height;
+        for (let cursor = index - 1; cursor >= 0; cursor--) {
+            if (smooth[cursor] > height) break;
+            leftMinimum = Math.min(leftMinimum, smooth[cursor]);
+        }
+        let rightMinimum = height;
+        for (let cursor = index + 1; cursor < length; cursor++) {
+            if (smooth[cursor] > height) break;
+            rightMinimum = Math.min(rightMinimum, smooth[cursor]);
+        }
+
+        const prominence = height - Math.max(leftMinimum, rightMinimum);
+        if (prominence < prominenceThreshold) continue;
+        const peakIndex = findXRDMLPeakIndex(smooth, index);
+        candidates.push({
+            x: x[peakIndex],
+            y: y[peakIndex],
+            prominence,
+            fwhm: calculateXRDMLFWHM(x, smooth, peakIndex, height - prominence / 2),
+            index: peakIndex
+        });
+    }
+
+    const minSpacing = Math.max(1, Math.round((11 - clampedSensitivity) * 1.5));
+    const ranked = candidates.sort((a, b) => b.prominence - a.prominence);
+    const filtered = [];
+    ranked.forEach(candidate => {
+        if (!filtered.some(peak => Math.abs(peak.index - candidate.index) < minSpacing)) filtered.push(candidate);
+    });
+    return filtered.sort((a, b) => a.x - b.x);
+}
+
+function findXRDMLPeakIndex(values, index) {
+    let start = index;
+    let end = index;
+    while (start > 0 && values[start - 1] === values[index]) start--;
+    while (end < values.length - 1 && values[end + 1] === values[index]) end++;
+    return Math.round((start + end) / 2);
+}
+
+function calculateXRDMLFWHM(xValues, smoothValues, peakIndex, halfHeight) {
+    const findCrossing = direction => {
+        for (let index = peakIndex; index !== 0 && index !== smoothValues.length - 1; index += direction) {
+            const next = index + direction;
+            if ((smoothValues[index] - halfHeight) * (smoothValues[next] - halfHeight) > 0) continue;
+            const yDifference = smoothValues[next] - smoothValues[index];
+            if (yDifference === 0) return (xValues[index] + xValues[next]) / 2;
+            const fraction = (halfHeight - smoothValues[index]) / yDifference;
+            return xValues[index] + fraction * (xValues[next] - xValues[index]);
+        }
+        return null;
+    };
+
+    const left = findCrossing(-1);
+    const right = findCrossing(1);
+    return left === null || right === null ? null : Math.abs(right - left);
+}
+
+function calculateXRDMLDSpacing(scan, twoTheta) {
+    if (!scan.wavelengthAngstrom || !/2\s*theta|twotheta/i.test(scan.axisLabel) || twoTheta <= 0 || twoTheta >= 180) {
+        return null;
+    }
+    const sine = Math.sin(twoTheta * Math.PI / 360);
+    return sine > 0 ? scan.wavelengthAngstrom / (2 * sine) : null;
+}
+
+function getXRDMLMaxIntensity(values) {
+    return values.reduce((maximum, value) => Math.max(maximum, value), -Infinity);
+}
+
+function updateXRDMLPeaksTable(peaks, enabled) {
+    const tableBody = document.getElementById('xrdml-peaks-table-body');
+    const count = document.getElementById('xrdml-detected-peak-count');
+    if (!tableBody || !count) return;
+
+    count.textContent = `${peaks.length} pik algılandı`;
+    tableBody.replaceChildren();
+    if (!enabled || peaks.length === 0) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 7;
+        cell.className = 'p-4 text-center text-slate-500 italic';
+        cell.textContent = enabled
+            ? 'Bu taramada seçilen hassasiyet düzeyinde belirgin pik bulunamadı.'
+            : 'Pik analizi için grafikten "Pik etiketleri" seçeneğini etkinleştirin.';
+        row.appendChild(cell);
+        tableBody.appendChild(row);
+        return;
+    }
+
+    peaks.forEach(peak => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-700/30 transition border-b border-slate-700/30';
+        const values = [
+            [peak.scanName, 'p-2 text-slate-200 max-w-40 truncate'],
+            [`${peak.x.toFixed(3)} ${peak.axisLabel}`, 'p-2 font-mono text-amber-300 whitespace-nowrap'],
+            [peak.dSpacing === null ? '—' : peak.dSpacing.toFixed(4), 'p-2 font-mono text-cyan-300'],
+            [peak.y.toFixed(2), 'p-2 font-mono text-slate-300'],
+            [`${peak.relativeIntensity.toFixed(1)}%`, 'p-2 font-mono text-slate-300'],
+            [peak.fwhm === null ? '—' : peak.fwhm.toFixed(4), 'p-2 font-mono text-slate-300'],
+            [peak.prominence.toFixed(2), 'p-2 font-mono text-slate-300']
+        ];
+        values.forEach(([text, className]) => {
+            const cell = document.createElement('td');
+            cell.className = className;
+            cell.textContent = text;
+            cell.title = text;
+            row.appendChild(cell);
+        });
+        tableBody.appendChild(row);
+    });
+}
+
+function exportXRDMLPeaksCSV() {
+    const visibleScans = xrdmlFiles.flatMap(file => file.scans).filter(scan => scan.visible);
+    if (visibleScans.length === 0) {
+        showToast('Pik dışa aktarmak için önce XRDML taraması yükleyin.', 'warning');
+        return;
+    }
+
+    const sensitivity = Number(document.getElementById('xrdml-peak-sensitivity')?.value || 5);
+    const rows = [['Tarama', 'Konum', 'Eksen', 'd-aralığı (Å)', 'Şiddet (counts)', 'Bağıl şiddet (%)', 'FWHM', 'Belirginlik']];
+    visibleScans.forEach(scan => {
+        const maxIntensity = getXRDMLMaxIntensity(scan.y);
+        findXRDMLPeaks(scan.x, scan.y, sensitivity).forEach(peak => {
+            const dSpacing = calculateXRDMLDSpacing(scan, peak.x);
+            rows.push([
+                scan.label,
+                peak.x.toFixed(5),
+                scan.axisLabel,
+                dSpacing === null ? '' : dSpacing.toFixed(6),
+                peak.y.toFixed(4),
+                maxIntensity > 0 ? (peak.y / maxIntensity * 100).toFixed(3) : '0',
+                peak.fwhm === null ? '' : peak.fwhm.toFixed(6),
+                peak.prominence.toFixed(4)
+            ]);
+        });
+    });
+
+    if (rows.length === 1) {
+        showToast('Seçilen taramalarda belirgin pik bulunamadı.', 'warning');
+        return;
+    }
+
+    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `XRDML_Pik_Analizi_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('XRDML pik analizi CSV olarak indirildi.', 'success');
 }
 
 function toggleXRDMLScan(fileId, scanIndex, visible) {
@@ -364,8 +626,21 @@ function downloadXRDMLWorkbook() {
 
     const workbook = XLSX.utils.book_new();
     const usedNames = new Set();
+    const peakRows = [[
+        'Tarama',
+        'Konum',
+        'Eksen',
+        'd-aralığı (Å)',
+        'Şiddet (counts)',
+        'Bağıl şiddet (%)',
+        'FWHM',
+        'Belirginlik'
+    ]];
+    let exportedScanCount = 0;
+    const sensitivity = Number(document.getElementById('xrdml-peak-sensitivity')?.value || 5);
     xrdmlFiles.forEach(file => {
         file.scans.forEach(scan => {
+            exportedScanCount++;
             const sheetName = uniqueXRDMLSheetName(`${file.name.replace(/\.[^/.]+$/, '')}_${scan.scanNumber}`, usedNames);
             const rows = [
                 ['XRDML dosyası', file.name],
@@ -375,6 +650,21 @@ function downloadXRDMLWorkbook() {
                 ...scan.x.map((position, index) => [position, scan.y[index]])
             ];
             XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), sheetName);
+
+            const maxIntensity = getXRDMLMaxIntensity(scan.y);
+            findXRDMLPeaks(scan.x, scan.y, sensitivity).forEach(peak => {
+                const dSpacing = calculateXRDMLDSpacing(scan, peak.x);
+                peakRows.push([
+                    scan.label,
+                    peak.x,
+                    scan.axisLabel,
+                    dSpacing === null ? '' : dSpacing,
+                    peak.y,
+                    maxIntensity > 0 ? peak.y / maxIntensity * 100 : 0,
+                    peak.fwhm === null ? '' : peak.fwhm,
+                    peak.prominence
+                ]);
+            });
         });
     });
 
@@ -382,11 +672,12 @@ function downloadXRDMLWorkbook() {
         showToast('Excel’e aktarılacak XRDML taraması bulunamadı.', 'warning');
         return;
     }
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(peakRows), uniqueXRDMLSheetName('Pik Analizi', usedNames));
 
     try {
         const date = new Date().toISOString().slice(0, 10);
         XLSX.writeFile(workbook, `XRDML_Taramalari_${date}.xlsx`);
-        showToast(`${usedNames.size} tarama Excel çalışma kitabına aktarıldı.`, 'success');
+        showToast(`${exportedScanCount} tarama ve pik analizi Excel çalışma kitabına aktarıldı.`, 'success');
     } catch (error) {
         showToast(`Excel dosyası oluşturulamadı: ${error.message}`, 'error');
     }
