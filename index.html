@@ -87,6 +87,10 @@
                         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-400"></i>
                         <span>Floresans Maker</span>
                     </button>
+                    <button onclick="switchTab('xrdml')" data-tab="xrdml" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                        <i data-lucide="activity" class="w-3.5 h-3.5 text-orange-400"></i>
+                        <span>XRDML</span>
+                    </button>
                     <button onclick="switchTab('csv-converter')" data-tab="csv-converter" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i>
                         <span>CSV Dönüştürücü</span>
@@ -124,6 +128,9 @@
                 </button>
                 <button onclick="switchTab('fluorescence')" data-tab="fluorescence" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-400"></i> Floresans
+                </button>
+                <button onclick="switchTab('xrdml')" data-tab="xrdml" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
+                    <i data-lucide="activity" class="w-3.5 h-3.5 text-orange-400"></i> XRDML
                 </button>
                 <button onclick="switchTab('csv-converter')" data-tab="csv-converter" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i> CSV Dönüştür
@@ -351,6 +358,43 @@
 
                     <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
                         <span class="text-xs text-emerald-400 font-semibold flex items-center gap-1 group-hover:underline">
+                            <span>Modülü Başlat</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        </span>
+                    </div>
+                </article>
+
+                <!-- KART: XRDML Analiz ve Excel -->
+                <article class="hub-tool-card glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer" onclick="switchTab('xrdml')" data-keywords="xrd xrdml difraksiyon kırınım x ışını grafik excel xlsx">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="p-3 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                <i data-lucide="activity" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-300 border border-orange-500/20">
+                                XRD Analizi
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-bold text-white group-hover:text-orange-300 transition-colors flex items-center justify-between">
+                                <span>XRDML Analiz & Excel</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition text-orange-400"></i>
+                            </h3>
+                            <p class="text-slate-400 text-xs mt-2 leading-relaxed">
+                                XRDML difraksiyon taramalarını interaktif grafikte inceleyin ve tüm taramaları çok sekmeli Excel çalışma kitabına aktarın.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Çoklu Tarama</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Plotly Grafik</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">.xlsx Dışa Aktar</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-xs text-orange-400 font-semibold flex items-center gap-1 group-hover:underline">
                             <span>Modülü Başlat</span>
                             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                         </span>
@@ -1487,6 +1531,61 @@
 
 
         <!-- ========================================== -->
+        <!-- TAB: XRDML ANALİZ VE EXCEL DÖNÜŞTÜRÜCÜ -->
+        <!-- ========================================== -->
+        <section id="tab-xrdml" class="tab-content space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-800/80">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-orange-600 rounded-xl shadow-md shadow-orange-600/20">
+                        <i data-lucide="activity" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight text-white">XRDML Analiz & Excel Dönüştürücü</h2>
+                        <p class="text-xs text-slate-400">XRDML dosyalarındaki bir veya daha fazla taramayı görüntüleyin, verileri Excel'e aktarın.</p>
+                    </div>
+                </div>
+                <button id="xrdml-export-button" onclick="downloadXRDMLWorkbook()" disabled class="disabled:opacity-40 disabled:cursor-not-allowed py-2 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Taramaları Excel'e Aktar</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800 shadow-lg space-y-4">
+                    <h3 class="text-xs font-semibold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i data-lucide="upload-cloud" class="w-4 h-4 text-orange-400"></i>
+                        XRDML Dosyaları
+                    </h3>
+                    <div id="xrdml-drop-zone" class="border-2 border-dashed border-orange-500/40 rounded-xl p-6 text-center cursor-pointer hover:border-orange-500 hover:bg-orange-500/5 transition flex flex-col items-center justify-center">
+                        <i data-lucide="file-up" class="w-8 h-8 text-orange-400 mb-2"></i>
+                        <p class="text-xs text-slate-200 font-semibold">XRDML Dosyalarını Sürükleyin</p>
+                        <p class="text-[10px] text-slate-400 mt-1">.xrdml uzantılı bir veya daha fazla dosya seçin</p>
+                        <input type="file" id="xrdml-file-input" accept=".xrdml,application/xml,text/xml" multiple class="hidden">
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400">
+                        <span>Yüklenen dosyalar (<span id="xrdml-file-count">0</span>)</span>
+                        <button onclick="clearXRDMLFiles()" class="text-red-400 hover:text-red-300 transition">Tümünü Temizle</button>
+                    </div>
+                    <div id="xrdml-files-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                        <p class="py-6 text-center text-xs text-slate-500 italic">Henüz XRDML dosyası yüklenmedi.</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg min-h-[480px] flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-200">XRD Difraktogramı</h3>
+                            <p id="xrdml-chart-caption" class="text-[10px] text-slate-500 mt-1">Yüklenen taramalar aynı grafikte gösterilir.</p>
+                        </div>
+                        <span id="xrdml-scan-count" class="text-[10px] bg-slate-800 text-orange-300 border border-slate-700 px-2 py-0.5 rounded-full font-mono">0 tarama</span>
+                    </div>
+                    <div id="xrdml-plotly-chart" class="w-full flex-1 min-h-[420px] rounded-lg"></div>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-500">XRDML XML verileri tarayıcınızda ayrıştırılır; dosyalar sunucuya gönderilmez. Excel çalışma kitabında her tarama ayrı bir sayfaya yazılır.</p>
+        </section>
+
+        <!-- ========================================== -->
         <!-- TAB 5: CSV TO XLSX (EXCEL) DÖNÜŞTÜRÜCÜ -->
         <!-- ========================================== -->
         <section id="tab-xlsx-converter" class="tab-content space-y-6">
@@ -1802,6 +1901,7 @@
     <script src="js/ftir.js"></script>
     <script src="js/uvvis.js"></script>
     <script src="js/fluorescence.js"></script>
+    <script src="js/xrdml.js"></script>
     <script src="js/csv-converter.js"></script>
     <script src="js/xlsx-converter.js"></script>
     <script src="js/calculators.js"></script>

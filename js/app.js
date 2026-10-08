@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initFTIRModule === 'function') initFTIRModule();
     if (typeof initUVVisModule === 'function') initUVVisModule();
     if (typeof initFluorescenceModule === 'function') initFluorescenceModule();
+    if (typeof initXRDMLModule === 'function') initXRDMLModule();
     if (typeof initCSVConverterModule === 'function') initCSVConverterModule();
     if (typeof initXLSXConverterModule === 'function') initXLSXConverterModule();
     if (typeof initCalculatorsModule === 'function') initCalculatorsModule();
@@ -39,7 +40,7 @@ function initRouter() {
 }
 
 function switchTab(tabId, updateHash = true) {
-    const validTabs = ['hub', 'ftir', 'uvvis', 'fluorescence', 'csv-converter', 'xlsx-converter', 'calculators'];
+    const validTabs = ['hub', 'ftir', 'uvvis', 'fluorescence', 'xrdml', 'csv-converter', 'xlsx-converter', 'calculators'];
     if (!validTabs.includes(tabId)) tabId = 'hub';
 
     DigitalLab.currentTab = tabId;
@@ -78,6 +79,8 @@ function switchTab(tabId, updateHash = true) {
             Plotly.Plots.resize('uvvis-plotly-chart');
         } else if (tabId === 'fluorescence' && document.getElementById('fluorescence-plotly-chart')) {
             Plotly.Plots.resize('fluorescence-plotly-chart');
+        } else if (tabId === 'xrdml' && document.getElementById('xrdml-plotly-chart')) {
+            Plotly.Plots.resize('xrdml-plotly-chart');
         }
     }, 100);
 

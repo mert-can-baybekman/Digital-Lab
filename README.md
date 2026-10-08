@@ -63,7 +63,15 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 
 ---
 
-### 4. 🔄 Çoklu CSV Karakter & Ayırıcı Dönüştürücü
+### 4. 📈 XRDML Difraktogram Analizörü & Excel Dışa Aktarımı
+- Bir veya daha fazla XRDML dosyasındaki birden çok taramayı ayrıştırma; bozuk veya desteklenmeyen taramalar için anlaşılır hata bildirimi.
+- Taramaları aynı interaktif Plotly grafiğinde görüntüleme ve her taramanın görünürlüğünü ayrı ayrı kontrol etme.
+- Her taramayı ayrı sayfaya koyan çok sekmeli Excel (.xlsx) çalışma kitabı oluşturma.
+- XML verileri tarayıcıda işlenir; dosyalar sunucuya gönderilmez.
+
+---
+
+### 5. 🔄 Çoklu CSV Karakter & Ayırıcı Dönüştürücü
 - **Türkçe/Avrupa Cihaz Formatı Dönüşümü:**
   - Noktalı virgül (`;`) ayırıcılarını virgüle (`,`),
   - Ondalık virgül (`,`) karakterlerini noktaya (`.`) dönüştürür.
@@ -73,13 +81,13 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 
 ---
 
-### 5. 📊 CSV ➔ Excel (.xlsx) Dönüştürücü
+### 6. 📊 CSV ➔ Excel (.xlsx) Dönüştürücü
 - Laboratuvar CSV/TXT dosyalarını biçimlendirilmiş gerçek Excel dosyalarına çevirme (SheetJS).
 - Çoklu dosyaları tek bir Excel çalışma kitabında **farklı sekmeler (sheets)** olarak birleştirme veya toplu ZIP indirme.
 
 ---
 
-### 6. 🧮 Bilimsel Hesaplayıcılar & Referans Kütüphanesi
+### 7. 🧮 Bilimsel Hesaplayıcılar & Referans Kütüphanesi
 - **Beer-Lambert Kanunu Hesaplayıcısı ($A = \varepsilon \cdot b \cdot c$):** Absorbans, Konsantrasyon, Molar Absorptivite veya Küvet Işık Yolu hesaplama.
 - **Doğrusal Regresyon & Kalibrasyon Eğrisi Analizi:** Standart veri setlerinden eğim, kesim noktası ve $R^2$ korelasyonunu hesaplama, bilinmeyen numune konsantrasyonunu bulma ve interaktif regresyon grafiği.
 - **Spektroskopi Birim Dönüştürücüsü:** Dalga boyu ($\text{nm}$) $\longleftrightarrow$ Dalga sayısı ($\text{cm}^{-1}$) $\longleftrightarrow$ Frekans ($\text{THz}$) $\longleftrightarrow$ Foton Enerjisi ($\text{eV}$) $\longleftrightarrow$ Molar Enerji ($\text{kJ/mol}$).
@@ -92,6 +100,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 - **Çekirdek:** Modern HTML5 & Vanilla JavaScript (Modüler Mimari)
 - **Stil & Arayüz:** Tailwind CSS + Glassmorphism Özel CSS Tasarım Sistemi
 - **Grafik Motoru:** [Plotly.js](https://plot.ly/javascript/) (Bilimsel interaktif grafikler)
+- **XRDML Ayrıştırma:** Tarayıcının yerel XML DOMParser API'si
 - **Veri Ayrıştırma:** [PapaParse](https://www.papaparse.com/)
 - **Elektronik Tablo Motoru:** [SheetJS (xlsx)](https://sheetjs.com/)
 - **Arşivleme:** [JSZip](https://stuk.github.io/jszip/)
