@@ -117,5 +117,5 @@ Tarayıcınızda `http://localhost:3000` adresine gidin.
 
 ## 📄 Lisans & Geliştirici
 
-Geliştirici: [@marijuannaa](https://github.com/marijuannaa)  
+Geliştirici: [@mert-can-baybekman](https://github.com/mert-can-baybekman)
 Açık kaynaklı ve bilimsel araştırmalara ücretsizdir.
