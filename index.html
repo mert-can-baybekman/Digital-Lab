@@ -290,7 +290,44 @@
                     </div>
                 </article>
 
-                <!-- KART 3: Çoklu CSV Karakter & Format Dönüştürücü -->
+                <!-- KART: XRDML Difraktogram Analizörü -->
+                <article class="hub-tool-card glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer" onclick="switchTab('xrdml')" data-keywords="xrd xrdml difraksiyon kırınım x ışını grafik excel xlsx">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="p-3 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                <i data-lucide="activity" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-300 border border-orange-500/20">
+                                Difraktogram Analizi
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-bold text-white group-hover:text-orange-300 transition-colors flex items-center justify-between">
+                                <span>XRDML Difraktogram Analizörü</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition text-orange-400"></i>
+                            </h3>
+                            <p class="text-slate-400 text-xs mt-2 leading-relaxed">
+                                XRDML difraksiyon taramalarını interaktif grafikte inceleyin ve tüm taramaları çok sekmeli Excel çalışma kitabına aktarın.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Çoklu Tarama</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Plotly Grafik</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">.xlsx Dışa Aktar</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-xs text-orange-400 font-semibold flex items-center gap-1 group-hover:underline">
+                            <span>Modülü Başlat</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        </span>
+                    </div>
+                </article>
+
+                <!-- KART: Çoklu CSV Karakter & Format Dönüştürücü -->
                 <article class="hub-tool-card glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer" onclick="switchTab('csv-converter')" data-keywords="csv dönüştürücü noktalı virgül karakter delimiter virgül nokta türkçe avrupa">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
@@ -327,7 +364,7 @@
                     </div>
                 </article>
 
-                <!-- KART 4: CSV to XLSX (Excel) -->
+                <!-- KART: CSV to XLSX (Excel) -->
                 <article class="hub-tool-card glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer" onclick="switchTab('xlsx-converter')" data-keywords="excel xlsx sheet tablo veri çalışma kitabı converter">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
@@ -358,43 +395,6 @@
 
                     <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
                         <span class="text-xs text-emerald-400 font-semibold flex items-center gap-1 group-hover:underline">
-                            <span>Modülü Başlat</span>
-                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                        </span>
-                    </div>
-                </article>
-
-                <!-- KART: XRDML Analiz ve Excel -->
-                <article class="hub-tool-card glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer" onclick="switchTab('xrdml')" data-keywords="xrd xrdml difraksiyon kırınım x ışını grafik excel xlsx">
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <div class="p-3 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                <i data-lucide="activity" class="w-6 h-6"></i>
-                            </div>
-                            <span class="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-300 border border-orange-500/20">
-                                XRD Analizi
-                            </span>
-                        </div>
-
-                        <div>
-                            <h3 class="text-lg font-bold text-white group-hover:text-orange-300 transition-colors flex items-center justify-between">
-                                <span>XRDML Analiz & Excel</span>
-                                <i data-lucide="arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition text-orange-400"></i>
-                            </h3>
-                            <p class="text-slate-400 text-xs mt-2 leading-relaxed">
-                                XRDML difraksiyon taramalarını interaktif grafikte inceleyin ve tüm taramaları çok sekmeli Excel çalışma kitabına aktarın.
-                            </p>
-                        </div>
-
-                        <div class="flex flex-wrap gap-1.5 pt-1">
-                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Çoklu Tarama</span>
-                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Plotly Grafik</span>
-                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">.xlsx Dışa Aktar</span>
-                        </div>
-                    </div>
-
-                    <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
-                        <span class="text-xs text-orange-400 font-semibold flex items-center gap-1 group-hover:underline">
                             <span>Modülü Başlat</span>
                             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                         </span>
