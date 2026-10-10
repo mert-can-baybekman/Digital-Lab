@@ -131,9 +131,12 @@ function renderGPC() {
     document.getElementById('gpc-point-count').textContent = points.length;
     document.getElementById('gpc-peak-value').textContent = peak.y.toFixed(4);
     document.getElementById('gpc-area-summary').textContent = `Alan: ${analysis.area.toPrecision(5)} • Pik: ${peaks.length}`;
+    const peakCount = document.getElementById('gpc-detected-peak-count');
+    if (peakCount) peakCount.textContent = `${peaks.length} pik`;
     document.getElementById('gpc-chart-caption').textContent = `${points[0].x} – ${points[points.length - 1].x} X aralığı`;
     const summary = document.getElementById('gpc-analysis-summary');
     if (summary) summary.textContent = `Maksimum @ ${peak.x.toFixed(3)} | Ağırlıklı merkez @ ${analysis.centroid.toFixed(3)}`;
+    updateGPCPeaksTable(points, peaks);
     document.getElementById('gpc-export-button').disabled = false;
     Plotly.react('gpc-plotly-chart', [{
         x: points.map(point => point.x), y: points.map(point => point.y), mode: 'lines', fill: 'tozeroy',
@@ -146,6 +149,26 @@ function renderGPC() {
         margin: { t: 20, r: 20, b: 50, l: 55 }, xaxis: { title: 'Tutunma zamanı / elüsyon hacmi' },
         yaxis: { title: 'Dedektör sinyali' }, legend: { orientation: 'h' }, hovermode: 'x unified'
     }, { responsive: true, displaylogo: false });
+}
+
+function updateGPCPeaksTable(points, peaks) {
+    const tableBody = document.getElementById('gpc-peaks-table-body');
+    if (!tableBody) return;
+    if (!peaks.length) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500 italic">Belirgin GPC piki bulunamadı.</td></tr>';
+        return;
+    }
+    const maxY = Math.max(...points.map(point => point.y), Number.EPSILON);
+    tableBody.innerHTML = peaks.map((peak, index) => `
+        <tr class="hover:bg-slate-700/30 transition border-b border-slate-700/30 text-xs">
+            <td class="p-2">${index + 1}</td>
+            <td class="p-2 font-mono text-amber-300">${peak.x.toFixed(4)}</td>
+            <td class="p-2 font-mono">${peak.y.toFixed(6)}</td>
+            <td class="p-2 font-mono">${(peak.y / maxY * 100).toFixed(2)}%</td>
+            <td class="p-2 font-mono text-emerald-400">${peak.prominence.toExponential(3)}</td>
+            <td class="p-2 text-slate-400">${peak === gpcState.analysis?.peak ? 'Ana pik' : 'Yardımcı pik'}</td>
+        </tr>
+    `).join('');
 }
 
 function downloadGPCCSV() {
@@ -169,6 +192,34 @@ function downloadGPCCSV() {
             ['Ağırlıklı merkez', gpcState.analysis.centroid]
         ]), 'Grafik Analizi');
     }
+    if (gpcState.peaks.length) {
+        const maxY = Math.max(...processed.map(point => point.y), Number.EPSILON);
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+            ['Pik #', 'X', 'Sinyal', 'Bağıl (%)', 'Belirginlik'],
+            ...gpcState.peaks.map((peak, index) => [index + 1, peak.x, peak.y, peak.y / maxY * 100, peak.prominence])
+        ]), 'Pik Analizi');
+    }
     XLSX.writeFile(workbook, `GPC_Islenmis_Veriler_${new Date().toISOString().slice(0, 10)}.xlsx`);
     showToast('GPC işlenmiş verileri XLSX olarak indirildi.', 'success');
+}
+
+function exportGPCPeaksCSV() {
+    if (!gpcState.peaks.length || !gpcState.processedPoints.length) {
+        showToast('Dışa aktarılacak GPC pik verisi bulunmuyor.', 'warning');
+        return;
+    }
+    const maxY = Math.max(...gpcState.processedPoints.map(point => point.y), Number.EPSILON);
+    let csv = 'Pik #,X,Sinyal,Bagil (%),Belirginlik,Not\n';
+    gpcState.peaks.forEach((peak, index) => {
+        const note = peak === gpcState.analysis?.peak ? 'Ana pik' : 'Yardimci pik';
+        csv += `${index + 1},${peak.x.toFixed(6)},${peak.y.toFixed(8)},${(peak.y / maxY * 100).toFixed(4)},${peak.prominence.toExponential(8)},"${note}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `GPC_Pik_Tablosu_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('GPC pik tablosu CSV olarak indirildi.', 'success');
 }

@@ -88,12 +88,20 @@ function findDSCPeaks(points) {
     const values = points.map(point => point.y);
     const range = Math.max(...values) - Math.min(...values);
     const threshold = Math.max(range * 0.03, Number.EPSILON);
+    const maxAbs = Math.max(...values.map(value => Math.abs(value)), Number.EPSILON);
     const peaks = [];
     for (let index = 1; index < values.length - 1; index++) {
         const isMax = values[index] > values[index - 1] && values[index] >= values[index + 1];
         const isMin = values[index] < values[index - 1] && values[index] <= values[index + 1];
-        if ((isMax || isMin) && Math.abs(values[index] - (values[index - 1] + values[index + 1]) / 2) >= threshold) {
-            peaks.push({ type: isMax ? 'Ekzotermik / maksimum' : 'Endotermik / minimum', x: points[index].x, y: points[index].y });
+        const prominence = Math.abs(values[index] - (values[index - 1] + values[index + 1]) / 2);
+        if ((isMax || isMin) && prominence >= threshold) {
+            peaks.push({
+                type: isMax ? 'Ekzotermik / maksimum' : 'Endotermik / minimum',
+                x: points[index].x,
+                y: points[index].y,
+                prominence,
+                relative: Math.abs(points[index].y) / maxAbs * 100
+            });
         }
     }
     return peaks.filter((peak, index) => index === 0 || Math.abs(peak.x - peaks[index - 1].x) > (points[points.length - 1].x - points[0].x) * 0.01).slice(0, 30);
@@ -157,12 +165,20 @@ function renderDSC() {
     document.getElementById('dsc-file-info').textContent = `${dscState.fileName} • ${points.length} veri noktası`;
     document.getElementById('dsc-point-count').textContent = points.length;
     document.getElementById('dsc-peak-count').textContent = peaks.length;
+    const detectedPeakCount = document.getElementById('dsc-detected-peak-count');
+    if (detectedPeakCount) detectedPeakCount.textContent = `${peaks.length} pik`;
     document.getElementById('dsc-export-button').disabled = false;
     document.getElementById('dsc-transition-summary').textContent = peaks.length ? `${peaks.length} geçiş adayı` : 'Belirgin geçiş bulunamadı';
     document.getElementById('dsc-chart-caption').textContent = `${points[0].x} – ${points[points.length - 1].x} aralığı`;
     document.getElementById('dsc-peaks-table-body').innerHTML = peaks.length ? peaks.map(peak => `
-        <tr><td class="p-2">${peak.type}</td><td class="p-2 font-mono">${peak.x.toFixed(3)}</td><td class="p-2 font-mono">${peak.y.toFixed(5)}</td><td class="p-2 text-slate-400">Yerel ekstremum</td></tr>
-    `).join('') : '<tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Belirgin termal pik bulunamadı.</td></tr>';
+        <tr>
+            <td class="p-2">${peak.type}</td>
+            <td class="p-2 font-mono text-amber-300">${peak.x.toFixed(3)}</td>
+            <td class="p-2 font-mono">${peak.y.toFixed(5)}</td>
+            <td class="p-2 font-mono">${peak.relative.toFixed(2)}%</td>
+            <td class="p-2 font-mono text-emerald-400">${peak.prominence.toExponential(3)}</td>
+        </tr>
+    `).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-500 italic">Belirgin termal pik bulunamadı.</td></tr>';
     if (analysis) {
         const summary = [
             `Alan≈ ${analysis.area.toFixed(3)}`,
@@ -192,7 +208,7 @@ function downloadDSCWorkbook() {
     const workbook = XLSX.utils.book_new();
     const processedPoints = dscState.processedPoints.length ? dscState.processedPoints : dscState.points;
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Sıcaklık', 'Orijinal Isı akışı', 'İşlenmiş Isı akışı'], ...dscState.points.map((point, index) => [point.x, point.y, processedPoints[index]?.y ?? ''])]), 'DSC Verisi');
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Tür', 'Sıcaklık', 'Isı akışı'], ...dscState.peaks.map(peak => [peak.type, peak.x, peak.y])]), 'Termal Pikler');
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Tür', 'Sıcaklık', 'Isı akışı', 'Bağıl (%)', 'Belirginlik'], ...dscState.peaks.map(peak => [peak.type, peak.x, peak.y, peak.relative, peak.prominence])]), 'Termal Pikler');
     if (dscState.analysis) {
         XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
             ['Metrik', 'Değer'],
@@ -205,4 +221,23 @@ function downloadDSCWorkbook() {
     }
     XLSX.writeFile(workbook, `DSC_Analizi_${new Date().toISOString().slice(0, 10)}.xlsx`);
     showToast('DSC analiz Excel dosyası indirildi.', 'success');
+}
+
+function exportDSCPeaksCSV() {
+    if (!dscState.peaks.length) {
+        showToast('Dışa aktarılacak DSC pik verisi bulunmuyor.', 'warning');
+        return;
+    }
+    let csv = 'Tur,Sicaklik,Isi Akisi,Bagil (%),Belirginlik\n';
+    dscState.peaks.forEach(peak => {
+        csv += `"${peak.type}",${peak.x.toFixed(4)},${peak.y.toFixed(6)},${peak.relative.toFixed(3)},${peak.prominence.toExponential(6)}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `DSC_Pik_Tablosu_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('DSC pik tablosu CSV olarak indirildi.', 'success');
 }

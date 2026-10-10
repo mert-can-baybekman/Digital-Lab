@@ -645,7 +645,7 @@ function updateFluorescenceSpectraUIList() {
                     <button onclick="changeFluorescenceSpectrumMultiplier('${spec.id}', 0.1)" class="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-300">0.1x</button>
                     <button onclick="changeFluorescenceSpectrumMultiplier('${spec.id}', 1.0)" class="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-300">1x</button>
                     <button onclick="changeFluorescenceSpectrumMultiplier('${spec.id}', 10.0)" class="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-300">10x</button>
-                    <input type="number" min="0.0001" step="0.1" value="${spec.scaleMultiplier}" onchange="setFluorescenceSpectrumMultiplier('${spec.id}', this.value)" class="w-16 bg-slate-800 border border-slate-700 text-[10px] text-rose-300 rounded px-1 py-0.5 outline-none">
+                    <input type="text" inputmode="decimal" value="${spec.scaleMultiplier}" onblur="setFluorescenceSpectrumMultiplier('${spec.id}', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" class="w-16 bg-slate-800 border border-slate-700 text-[10px] text-rose-300 rounded px-1 py-0.5 outline-none">
                     <span class="font-mono text-rose-300">x</span>
                 </div>
             </div>
@@ -693,9 +693,14 @@ function changeFluorescenceSpectrumMultiplier(id, mult) {
 }
 
 function setFluorescenceSpectrumMultiplier(id, inputValue) {
-    const value = Number(String(inputValue).replace(',', '.'));
+    const text = String(inputValue || '').trim().replace(',', '.');
+    if (!text) {
+        updateFluorescenceSpectraUIList();
+        return;
+    }
+    const value = Number(text);
     if (!Number.isFinite(value) || value <= 0) {
-        showToast('Ölçek çarpanı için geçerli bir sayı girin.', 'warning');
+        showToast('Ölçek çarpanı için geçerli bir sayı girin (örn: 0.5, 1, 2.5).', 'warning');
         updateFluorescenceSpectraUIList();
         return;
     }

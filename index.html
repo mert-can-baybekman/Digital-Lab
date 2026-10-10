@@ -1782,8 +1782,20 @@
                 </div>
             </div>
             <div class="glass-panel p-5 rounded-2xl border border-slate-800 shadow-lg">
-                <h3 class="text-xs font-semibold text-slate-200 mb-3">Tespit Edilen Termal Pikler</h3>
-                <div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[520px]"><thead class="text-slate-400 bg-slate-900/60"><tr><th class="p-2">Tür</th><th class="p-2">Sıcaklık</th><th class="p-2">Isı akışı</th><th class="p-2">Not</th></tr></thead><tbody id="dsc-peaks-table-body" class="divide-y divide-slate-800/60 text-slate-300"><tr><td colspan="4" class="p-4 text-center text-slate-500 italic">DSC dosyası yükleyin.</td></tr></tbody></table></div>
+                <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2.5">
+                    <h3 class="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="table" class="w-4 h-4 text-red-400"></i>
+                        Tespit Edilen DSC Pikleri (Sıcaklık & Isı Akışı)
+                    </h3>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-slate-400 font-mono" id="dsc-detected-peak-count">0 pik</span>
+                        <button onclick="exportDSCPeaksCSV()" class="text-xs text-red-400 hover:text-red-300 font-medium flex items-center gap-1">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>CSV Olarak İndir</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[700px]"><thead class="text-slate-400 bg-slate-900/60"><tr><th class="p-2">Termal Tür</th><th class="p-2">Sıcaklık</th><th class="p-2">Isı Akışı</th><th class="p-2">Bağıl (%)</th><th class="p-2">Belirginlik</th></tr></thead><tbody id="dsc-peaks-table-body" class="divide-y divide-slate-800/60 text-slate-300"><tr><td colspan="5" class="p-4 text-center text-slate-500 italic">DSC dosyası yükleyin.</td></tr></tbody></table></div>
             </div>
             <p class="text-[10px] text-slate-500">DSC Excel verileri tarayıcınızda işlenir; dosyalar sunucuya gönderilmez. Pik yönü cihazın ısı akışı işaretine göre ekzotermik veya endotermik olarak yorumlanır.</p>
         </section>
@@ -1842,6 +1854,40 @@
                     <div class="border-t border-slate-800 mt-3 pt-3">
                         <p id="gpc-analysis-summary" class="text-[10px] text-teal-300 font-mono">Grafik analizi bekleniyor</p>
                     </div>
+                </div>
+            </div>
+            <div class="glass-panel p-5 rounded-2xl border border-slate-800 shadow-lg">
+                <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2.5">
+                    <h3 class="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="table" class="w-4 h-4 text-teal-400"></i>
+                        Tespit Edilen GPC Pikleri (X & Sinyal)
+                    </h3>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-slate-400 font-mono" id="gpc-detected-peak-count">0 pik</span>
+                        <button onclick="exportGPCPeaksCSV()" class="text-xs text-teal-400 hover:text-teal-300 font-medium flex items-center gap-1">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>CSV Olarak İndir</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                    <table class="w-full text-left border-collapse text-xs min-w-[760px]">
+                        <thead>
+                            <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-800 sticky top-0">
+                                <th class="p-2">Pik #</th>
+                                <th class="p-2">X Konumu</th>
+                                <th class="p-2">Sinyal</th>
+                                <th class="p-2">Bağıl (%)</th>
+                                <th class="p-2">Belirginlik</th>
+                                <th class="p-2">Not</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gpc-peaks-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-slate-500 italic">GPC dosyası yükleyin.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <p class="text-[10px] text-slate-500">GPC TXT verileri tarayıcınızda işlenir; ilk iki sayısal sütun X ve dedektör sinyali olarak kullanılır. Cihazın başlık ve metadata satırları otomatik ayıklanır.</p>
