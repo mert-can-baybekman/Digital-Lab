@@ -91,6 +91,14 @@
                         <i data-lucide="activity" class="w-3.5 h-3.5 text-orange-400"></i>
                         <span>XRDML</span>
                     </button>
+                    <button onclick="switchTab('dsc')" data-tab="dsc" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                        <i data-lucide="flame" class="w-3.5 h-3.5 text-red-400"></i>
+                        <span>DSC</span>
+                    </button>
+                    <button onclick="switchTab('gpc')" data-tab="gpc" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                        <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-teal-400"></i>
+                        <span>GPC</span>
+                    </button>
                     <button onclick="switchTab('csv-converter')" data-tab="csv-converter" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i>
                         <span>CSV Dönüştürücü</span>
@@ -131,6 +139,12 @@
                 </button>
                 <button onclick="switchTab('xrdml')" data-tab="xrdml" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
                     <i data-lucide="activity" class="w-3.5 h-3.5 text-orange-400"></i> XRDML
+                </button>
+                <button onclick="switchTab('dsc')" data-tab="dsc" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
+                    <i data-lucide="flame" class="w-3.5 h-3.5 text-red-400"></i> DSC
+                </button>
+                <button onclick="switchTab('gpc')" data-tab="gpc" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
+                    <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-teal-400"></i> GPC
                 </button>
                 <button onclick="switchTab('csv-converter')" data-tab="csv-converter" class="nav-tab-btn whitespace-nowrap px-2.5 py-1 text-xs rounded-lg font-medium transition flex items-center gap-1">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i> CSV Dönüştür
@@ -324,6 +338,60 @@
                             <span>Modülü Başlat</span>
                             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                         </span>
+                    </div>
+                </article>
+
+                <!-- KART: DSC Analizörü -->
+                <article class="hub-tool-card glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer" onclick="switchTab('dsc')" data-keywords="dsc differential scanning calorimetry kalorimetri termal analiz ısı akışı sıcaklık xls xlsx cam geçiş erime kristallenme">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="p-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                <i data-lucide="flame" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-red-500/10 text-red-300 border border-red-500/20">Termal Analiz</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white group-hover:text-red-300 transition-colors flex items-center justify-between">
+                                <span>DSC Analizörü</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition text-red-400"></i>
+                            </h3>
+                            <p class="text-slate-400 text-xs mt-2 leading-relaxed">Differential Scanning Calorimetry ölçümlerini Excel dosyalarından okuyun; sıcaklık-ısı akışı eğrisini, geçişleri ve termal pikleri inceleyin.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">.xls / .xlsx</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Tg / Tm Pikleri</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Excel Dışa Aktar</span>
+                        </div>
+                    </div>
+                    <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-xs text-red-400 font-semibold flex items-center gap-1 group-hover:underline">Modülü Başlat <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                    </div>
+                </article>
+
+                <!-- KART: GPC Analizörü -->
+                <article class="hub-tool-card glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer" onclick="switchTab('gpc')" data-keywords="gpc gel permeation chromatography jel geçirgenlik kromatografisi molekül ağırlığı polimer txt kromatogram retention time">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="p-3 bg-teal-500/10 text-teal-400 border border-teal-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">Polimer Analizi</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white group-hover:text-teal-300 transition-colors flex items-center justify-between">
+                                <span>GPC Analizörü</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition text-teal-400"></i>
+                            </h3>
+                            <p class="text-slate-400 text-xs mt-2 leading-relaxed">Gel Permeation Chromatography cihazlarının varsayılan TXT çıktılarından kromatogramı okuyun, tutunma zamanını ve sinyal dağılımını analiz edin.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">.txt</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Kromatogram</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">Pik / Alan</span>
+                        </div>
+                    </div>
+                    <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-xs text-teal-400 font-semibold flex items-center gap-1 group-hover:underline">Modülü Başlat <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
                     </div>
                 </article>
 
@@ -1630,6 +1698,94 @@
         </section>
 
         <!-- ========================================== -->
+        <!-- TAB: DSC ANALİZÖRÜ -->
+        <!-- ========================================== -->
+        <section id="tab-dsc" class="tab-content space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-800/80">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-red-600 rounded-xl shadow-md shadow-red-600/20"><i data-lucide="flame" class="w-6 h-6 text-white"></i></div>
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight text-white">DSC Analizörü</h2>
+                        <p class="text-xs text-slate-400">Differential Scanning Calorimetry Excel çıktılarından sıcaklık-ısı akışı eğrilerini ve termal geçişleri analiz edin.</p>
+                    </div>
+                </div>
+                <button id="dsc-export-button" onclick="downloadDSCWorkbook()" disabled class="disabled:opacity-40 disabled:cursor-not-allowed py-2 px-3 text-xs bg-red-600 hover:bg-red-500 text-white rounded-lg font-medium transition flex items-center gap-1.5">
+                    <i data-lucide="download" class="w-4 h-4"></i> XLSX İndir
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800 shadow-lg space-y-4">
+                    <h3 class="text-xs font-semibold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2"><i data-lucide="upload-cloud" class="w-4 h-4 text-red-400"></i> DSC Excel Dosyası</h3>
+                    <div id="dsc-drop-zone" class="border-2 border-dashed border-red-500/40 rounded-xl p-6 text-center cursor-pointer hover:border-red-500 hover:bg-red-500/5 transition">
+                        <i data-lucide="file-spreadsheet" class="w-8 h-8 text-red-400 mx-auto mb-2"></i>
+                        <p class="text-xs text-slate-200 font-semibold">.xls / .xlsx dosyasını sürükleyin</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Cihazın Excel çalışma kitabındaki ilk uygun sayfa okunur.</p>
+                        <input type="file" id="dsc-file-input" accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden">
+                    </div>
+                    <div id="dsc-file-info" class="text-[10px] text-slate-400">Henüz dosya yüklenmedi.</div>
+                    <div class="grid grid-cols-2 gap-2 text-center">
+                        <div class="bg-slate-900/70 rounded-lg p-2"><div id="dsc-point-count" class="text-sm font-mono text-red-300">0</div><div class="text-[10px] text-slate-500">Nokta</div></div>
+                        <div class="bg-slate-900/70 rounded-lg p-2"><div id="dsc-peak-count" class="text-sm font-mono text-red-300">0</div><div class="text-[10px] text-slate-500">Pik</div></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg min-h-[480px] flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                        <div><h3 class="text-sm font-semibold text-slate-200">DSC Termogramı</h3><p id="dsc-chart-caption" class="text-[10px] text-slate-500 mt-1">Sıcaklık ve ısı akışı sütunları otomatik algılanır.</p></div>
+                        <span id="dsc-transition-summary" class="text-[10px] text-red-300 font-mono">Geçiş bekleniyor</span>
+                    </div>
+                    <div id="dsc-plotly-chart" class="w-full flex-1 min-h-[360px] rounded-lg"></div>
+                </div>
+            </div>
+            <div class="glass-panel p-5 rounded-2xl border border-slate-800 shadow-lg">
+                <h3 class="text-xs font-semibold text-slate-200 mb-3">Tespit Edilen Termal Pikler</h3>
+                <div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[520px]"><thead class="text-slate-400 bg-slate-900/60"><tr><th class="p-2">Tür</th><th class="p-2">Sıcaklık</th><th class="p-2">Isı akışı</th><th class="p-2">Not</th></tr></thead><tbody id="dsc-peaks-table-body" class="divide-y divide-slate-800/60 text-slate-300"><tr><td colspan="4" class="p-4 text-center text-slate-500 italic">DSC dosyası yükleyin.</td></tr></tbody></table></div>
+            </div>
+            <p class="text-[10px] text-slate-500">DSC Excel verileri tarayıcınızda işlenir; dosyalar sunucuya gönderilmez. Pik yönü cihazın ısı akışı işaretine göre ekzotermik veya endotermik olarak yorumlanır.</p>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB: GPC ANALİZÖRÜ -->
+        <!-- ========================================== -->
+        <section id="tab-gpc" class="tab-content space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-800/80">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-teal-600 rounded-xl shadow-md shadow-teal-600/20"><i data-lucide="bar-chart-3" class="w-6 h-6 text-white"></i></div>
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight text-white">GPC Analizörü</h2>
+                        <p class="text-xs text-slate-400">Gel Permeation Chromatography cihazlarının varsayılan TXT çıktılarını kromatogram olarak inceleyin.</p>
+                    </div>
+                </div>
+                <button id="gpc-export-button" onclick="downloadGPCCSV()" disabled class="disabled:opacity-40 disabled:cursor-not-allowed py-2 px-3 text-xs bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition flex items-center gap-1.5">
+                    <i data-lucide="download" class="w-4 h-4"></i> CSV İndir
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800 shadow-lg space-y-4">
+                    <h3 class="text-xs font-semibold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2"><i data-lucide="upload-cloud" class="w-4 h-4 text-teal-400"></i> GPC TXT Dosyası</h3>
+                    <div id="gpc-drop-zone" class="border-2 border-dashed border-teal-500/40 rounded-xl p-6 text-center cursor-pointer hover:border-teal-500 hover:bg-teal-500/5 transition">
+                        <i data-lucide="file-text" class="w-8 h-8 text-teal-400 mx-auto mb-2"></i>
+                        <p class="text-xs text-slate-200 font-semibold">.txt dosyasını sürükleyin</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Başlık satırları ve sekme/noktalı virgül ayracı otomatik atlanır.</p>
+                        <input type="file" id="gpc-file-input" accept=".txt,text/plain" class="hidden">
+                    </div>
+                    <div id="gpc-file-info" class="text-[10px] text-slate-400">Henüz dosya yüklenmedi.</div>
+                    <div class="grid grid-cols-2 gap-2 text-center">
+                        <div class="bg-slate-900/70 rounded-lg p-2"><div id="gpc-point-count" class="text-sm font-mono text-teal-300">0</div><div class="text-[10px] text-slate-500">Nokta</div></div>
+                        <div class="bg-slate-900/70 rounded-lg p-2"><div id="gpc-peak-value" class="text-sm font-mono text-teal-300">-</div><div class="text-[10px] text-slate-500">Maksimum</div></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg min-h-[480px] flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                        <div><h3 class="text-sm font-semibold text-slate-200">GPC Kromatogramı</h3><p id="gpc-chart-caption" class="text-[10px] text-slate-500 mt-1">Tutunma zamanı / elüsyon hacmi ve dedektör sinyali.</p></div>
+                        <span id="gpc-area-summary" class="text-[10px] text-teal-300 font-mono">Alan bekleniyor</span>
+                    </div>
+                    <div id="gpc-plotly-chart" class="w-full flex-1 min-h-[360px] rounded-lg"></div>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-500">GPC TXT verileri tarayıcınızda işlenir; ilk iki sayısal sütun X ve dedektör sinyali olarak kullanılır. Cihazın başlık ve metadata satırları otomatik ayıklanır.</p>
+        </section>
+
+        <!-- ========================================== -->
         <!-- TAB 5: CSV TO XLSX (EXCEL) DÖNÜŞTÜRÜCÜ -->
         <!-- ========================================== -->
         <section id="tab-xlsx-converter" class="tab-content space-y-6">
@@ -1946,6 +2102,8 @@
     <script src="js/uvvis.js"></script>
     <script src="js/fluorescence.js"></script>
     <script src="js/xrdml.js"></script>
+    <script src="js/dsc.js"></script>
+    <script src="js/gpc.js"></script>
     <script src="js/csv-converter.js"></script>
     <script src="js/xlsx-converter.js"></script>
     <script src="js/calculators.js"></script>

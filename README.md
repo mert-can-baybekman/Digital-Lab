@@ -73,7 +73,19 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 
 ---
 
-### 5. 🔄 Çoklu CSV Karakter & Ayırıcı Dönüştürücü
+### 5. 🔥 DSC (Differential Scanning Calorimetry) Analizörü
+- Cihazdan alınan `.xls` veya `.xlsx` DSC çalışma kitaplarını tarayıcıda okur.
+- Sıcaklık ve ısı akışı sütunlarını otomatik algılayarak termogramı Plotly ile çizer.
+- Yerel ekstremumları endotermik/ekzotermik geçiş adayı olarak listeler ve analiz sonucunu `.xlsx` olarak dışa aktarır.
+
+### 6. 🧬 GPC (Gel Permeation Chromatography) Analizörü
+- GPC cihazlarının varsayılan `.txt` çıktısını okur; başlık ve metadata satırlarını otomatik atlar.
+- İlk iki sayısal sütunu X ve dedektör sinyali olarak kromatogramda gösterir.
+- Maksimum sinyal ve trapez alanını hesaplar, temizlenmiş veriyi `.csv` olarak dışa aktarır.
+
+---
+
+### 7. 🔄 Çoklu CSV Karakter & Ayırıcı Dönüştürücü
 - **Türkçe/Avrupa Cihaz Formatı Dönüşümü:**
   - Noktalı virgül (`;`) ayırıcılarını virgüle (`,`),
   - Ondalık virgül (`,`) karakterlerini noktaya (`.`) dönüştürür.
@@ -83,13 +95,13 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 
 ---
 
-### 6. 📊 CSV ➔ Excel (.xlsx) Dönüştürücü
+### 8. 📊 CSV ➔ Excel (.xlsx) Dönüştürücü
 - Laboratuvar CSV/TXT dosyalarını biçimlendirilmiş gerçek Excel dosyalarına çevirme (SheetJS).
 - Çoklu dosyaları tek bir Excel çalışma kitabında **farklı sekmeler (sheets)** olarak birleştirme veya toplu ZIP indirme.
 
 ---
 
-### 7. 🧮 Bilimsel Hesaplayıcılar & Referans Kütüphanesi
+### 9. 🧮 Bilimsel Hesaplayıcılar & Referans Kütüphanesi
 - **Beer-Lambert Kanunu Hesaplayıcısı ($A = \varepsilon \cdot b \cdot c$):** Absorbans, Konsantrasyon, Molar Absorptivite veya Küvet Işık Yolu hesaplama.
 - **Doğrusal Regresyon & Kalibrasyon Eğrisi Analizi:** Standart veri setlerinden eğim, kesim noktası ve $R^2$ korelasyonunu hesaplama, bilinmeyen numune konsantrasyonunu bulma ve interaktif regresyon grafiği.
 - **Spektroskopi Birim Dönüştürücüsü:** Dalga boyu ($\text{nm}$) $\longleftrightarrow$ Dalga sayısı ($\text{cm}^{-1}$) $\longleftrightarrow$ Frekans ($\text{THz}$) $\longleftrightarrow$ Foton Enerjisi ($\text{eV}$) $\longleftrightarrow$ Molar Enerji ($\text{kJ/mol}$).
