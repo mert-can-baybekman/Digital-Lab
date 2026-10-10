@@ -581,6 +581,43 @@ function downloadFTIRChart(format = 'png') {
     });
 }
 
+function downloadFTIRProcessedWorkbook() {
+    if (typeof XLSX === 'undefined') {
+        showToast('SheetJS Excel motoru yüklenemedi.', 'error');
+        return;
+    }
+    if (ftirSpectraList.length === 0) {
+        showToast('İndirilecek FTIR verisi bulunmuyor.', 'warning');
+        return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const yMode = document.getElementById('ftir-y-mode')?.value || 'raw';
+    const normalize = document.getElementById('ftir-normalize-y')?.checked || false;
+    const enableSmoothing = document.getElementById('ftir-enable-smoothing')?.checked || false;
+    const smoothingLevel = parseInt(document.getElementById('ftir-smoothing-level')?.value || '7', 10);
+
+    ftirSpectraList.forEach(spec => {
+        const rows = [
+            ['Spektrum', spec.name],
+            ['Y modu', yMode],
+            ['Min-Max normalizasyon', normalize ? 'Açık' : 'Kapalı'],
+            ['Gürültü azaltma', enableSmoothing ? 'Açık' : 'Kapalı'],
+            ['Filtre gücü', smoothingLevel],
+            [],
+            ['Dalga Sayısı (cm-1)', 'Orijinal Y', 'İşlenmiş Y']
+        ];
+        spec.rawX.forEach((x, index) => {
+            rows.push([x, spec.rawY[index], spec.processedY[index] ?? '']);
+        });
+        const sheetName = (spec.name.replace(/[:\\/?*\[\]]/g, '').slice(0, 31) || 'FTIR').trim();
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), sheetName);
+    });
+
+    XLSX.writeFile(workbook, `FTIR_Islenmis_Veriler_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    showToast('FTIR işlenmiş verileri XLSX olarak indirildi.', 'success');
+}
+
 function updateFTIRSpectraUIList() {
     const container = document.getElementById('ftir-spectra-list');
     const countEl = document.getElementById('ftir-spectrum-count');
@@ -1210,5 +1247,4 @@ function downloadKineticsChart(format = 'png') {
         showToast('Görsel indirilirken hata oluştu.', 'error');
     });
 }
-
 

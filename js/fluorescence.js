@@ -645,7 +645,8 @@ function updateFluorescenceSpectraUIList() {
                     <button onclick="changeFluorescenceSpectrumMultiplier('${spec.id}', 0.1)" class="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-300">0.1x</button>
                     <button onclick="changeFluorescenceSpectrumMultiplier('${spec.id}', 1.0)" class="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-300">1x</button>
                     <button onclick="changeFluorescenceSpectrumMultiplier('${spec.id}', 10.0)" class="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-300">10x</button>
-                    <span class="font-mono text-rose-300 ml-1">${spec.scaleMultiplier.toFixed(2)}x</span>
+                    <input type="number" min="0.0001" step="0.1" value="${spec.scaleMultiplier}" onchange="setFluorescenceSpectrumMultiplier('${spec.id}', this.value)" class="w-16 bg-slate-800 border border-slate-700 text-[10px] text-rose-300 rounded px-1 py-0.5 outline-none">
+                    <span class="font-mono text-rose-300">x</span>
                 </div>
             </div>
         </div>
@@ -681,10 +682,24 @@ function changeFluorescenceSpectrumType(id, type) {
 function changeFluorescenceSpectrumMultiplier(id, mult) {
     const spec = fluorescenceSpectraList.find(s => s.id === id);
     if (spec) {
+        if (!Number.isFinite(mult) || mult <= 0) {
+            showToast('Ölçek çarpanı 0’dan büyük bir sayı olmalıdır.', 'warning');
+            return;
+        }
         spec.scaleMultiplier = mult;
         processAndPlotFluorescenceData();
         updateFluorescenceSpectraUIList();
     }
+}
+
+function setFluorescenceSpectrumMultiplier(id, inputValue) {
+    const value = Number(String(inputValue).replace(',', '.'));
+    if (!Number.isFinite(value) || value <= 0) {
+        showToast('Ölçek çarpanı için geçerli bir sayı girin.', 'warning');
+        updateFluorescenceSpectraUIList();
+        return;
+    }
+    changeFluorescenceSpectrumMultiplier(id, value);
 }
 
 function removeFluorescenceSpectrum(id) {
@@ -775,4 +790,41 @@ function downloadFluorescenceChart(format = 'png') {
     }).catch(() => {
         showToast('Görsel indirilirken bir hata oluştu.', 'error');
     });
+}
+
+function downloadFluorescenceProcessedWorkbook() {
+    if (typeof XLSX === 'undefined') {
+        showToast('SheetJS Excel motoru yüklenemedi.', 'error');
+        return;
+    }
+    if (fluorescenceSpectraList.length === 0) {
+        showToast('İndirilecek floresans verisi bulunmuyor.', 'warning');
+        return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const normMode = document.getElementById('fluorescence-norm-mode')?.value || 'auto_scale';
+    const enableSmoothing = document.getElementById('fluorescence-enable-smoothing')?.checked || false;
+    const smoothingLevel = parseInt(document.getElementById('fluorescence-smoothing-level')?.value || '7', 10);
+
+    fluorescenceSpectraList.forEach(spec => {
+        const rows = [
+            ['Spektrum', spec.name],
+            ['Tür', spec.type],
+            ['Ölçek çarpanı', spec.scaleMultiplier],
+            ['Ölçek modu', normMode],
+            ['Gürültü azaltma aktif', enableSmoothing ? 'Evet' : 'Hayır'],
+            ['Filtre gücü', smoothingLevel],
+            [],
+            ['Dalga Boyu (nm)', 'Orijinal Y', 'İşlenmiş Y (Çarpılmış / Yumuşatılmış)']
+        ];
+        spec.rawX.forEach((x, index) => {
+            rows.push([x, spec.rawY[index], spec.processedY[index] ?? '']);
+        });
+        const sheetName = (spec.name.replace(/[:\\/?*\[\]]/g, '').slice(0, 31) || 'Floresans').trim();
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), sheetName);
+    });
+
+    XLSX.writeFile(workbook, `Floresans_Islenmis_Veriler_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    showToast('Floresans işlenmiş verileri XLSX olarak indirildi.', 'success');
 }

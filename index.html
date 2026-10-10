@@ -698,6 +698,10 @@
                                     <i data-lucide="image" class="w-3.5 h-3.5 text-amber-400"></i>
                                     <span>JPG</span>
                                 </button>
+                                <button onclick="downloadFTIRProcessedWorkbook()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg transition">
+                                    <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                                    <span>İşlenmiş XLSX</span>
+                                </button>
                             </div>
                         </div>
                         
@@ -1074,6 +1078,10 @@
                                 <button onclick="downloadUVVisChart('jpeg')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition">
                                     <i data-lucide="image" class="w-3.5 h-3.5 text-amber-400"></i>
                                     <span>JPG</span>
+                                </button>
+                                <button onclick="downloadUVVisProcessedWorkbook()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg transition">
+                                    <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                                    <span>İşlenmiş XLSX</span>
                                 </button>
                             </div>
                         </div>
@@ -1461,6 +1469,10 @@
                                     <i data-lucide="image" class="w-3.5 h-3.5 text-amber-400"></i>
                                     <span>JPG</span>
                                 </button>
+                                <button onclick="downloadFluorescenceProcessedWorkbook()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg transition">
+                                    <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                                    <span>İşlenmiş XLSX</span>
+                                </button>
                             </div>
                         </div>
                         
@@ -1612,10 +1624,16 @@
                         <p class="text-xs text-slate-400">XRDML dosyalarındaki bir veya daha fazla taramayı görüntüleyin, verileri Excel'e aktarın.</p>
                     </div>
                 </div>
-                <button id="xrdml-export-button" onclick="downloadXRDMLWorkbook()" disabled class="disabled:opacity-40 disabled:cursor-not-allowed py-2 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition flex items-center justify-center gap-1.5">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    <span>Taramaları Excel'e Aktar</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="xrdml-export-button" onclick="downloadXRDMLWorkbook()" disabled class="disabled:opacity-40 disabled:cursor-not-allowed py-2 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition flex items-center justify-center gap-1.5">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Taramaları Excel'e Aktar</span>
+                    </button>
+                    <button id="xrdml-processed-export-button" onclick="downloadXRDMLProcessedWorkbook()" disabled class="disabled:opacity-40 disabled:cursor-not-allowed py-2 px-3 text-xs bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg font-medium transition flex items-center justify-center gap-1.5">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                        <span>İşlenmiş XLSX</span>
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1646,6 +1664,15 @@
                             <p id="xrdml-chart-caption" class="text-[10px] text-slate-500 mt-1">Yüklenen taramalar aynı grafikte gösterilir.</p>
                         </div>
                         <div class="flex items-center gap-3">
+                            <label class="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer" for="xrdml-enable-smoothing">
+                                <input type="checkbox" id="xrdml-enable-smoothing" class="w-3.5 h-3.5 accent-cyan-500 rounded cursor-pointer" onchange="updateXRDMLPlot()">
+                                Gürültü azaltma
+                            </label>
+                            <label class="flex items-center gap-2 text-[10px] text-slate-400" for="xrdml-smoothing-level">
+                                Filtre
+                                <input type="range" id="xrdml-smoothing-level" min="3" max="31" step="2" value="7" class="w-20 accent-cyan-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer" onchange="updateXRDMLPlot()" oninput="document.getElementById('xrdml-smoothing-value').textContent = this.value">
+                                <span id="xrdml-smoothing-value" class="font-mono text-cyan-300 w-3">7</span>
+                            </label>
                             <label class="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer" for="xrdml-show-peaks">
                                 <input type="checkbox" id="xrdml-show-peaks" checked class="w-3.5 h-3.5 accent-amber-500 rounded cursor-pointer" onchange="updateXRDMLPlot()">
                                 Pik etiketleri
@@ -1727,6 +1754,20 @@
                         <div class="bg-slate-900/70 rounded-lg p-2"><div id="dsc-point-count" class="text-sm font-mono text-red-300">0</div><div class="text-[10px] text-slate-500">Nokta</div></div>
                         <div class="bg-slate-900/70 rounded-lg p-2"><div id="dsc-peak-count" class="text-sm font-mono text-red-300">0</div><div class="text-[10px] text-slate-500">Pik</div></div>
                     </div>
+                    <div class="flex flex-col gap-2 pt-2 border-t border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs text-slate-300 font-medium flex items-center gap-1.5 cursor-pointer" for="dsc-enable-smoothing">
+                                <i data-lucide="waves" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                Gürültü Azaltma
+                            </label>
+                            <input type="checkbox" id="dsc-enable-smoothing" class="w-4 h-4 accent-cyan-500 rounded cursor-pointer" onchange="renderDSC()">
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[11px] text-slate-400">Filtre Gücü:</span>
+                            <input type="range" id="dsc-smoothing-level" min="3" max="31" step="2" value="7" class="w-28 accent-cyan-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer" onchange="renderDSC()" oninput="document.getElementById('dsc-smoothing-val').innerText = this.value">
+                            <span id="dsc-smoothing-val" class="text-[10px] font-mono text-cyan-400 w-4 text-right">7</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="lg:col-span-2 glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg min-h-[480px] flex flex-col">
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
@@ -1734,6 +1775,10 @@
                         <span id="dsc-transition-summary" class="text-[10px] text-red-300 font-mono">Geçiş bekleniyor</span>
                     </div>
                     <div id="dsc-plotly-chart" class="w-full flex-1 min-h-[360px] rounded-lg"></div>
+                    <div class="border-t border-slate-800 mt-3 pt-3">
+                        <p id="dsc-analysis-summary" class="text-[10px] text-red-300 font-mono">Grafik analizi bekleniyor</p>
+                        <p id="dsc-analysis-extrema" class="text-[10px] text-slate-400 mt-1">Yüklenen DSC eğrisinden otomatik metrikler hesaplanır.</p>
+                    </div>
                 </div>
             </div>
             <div class="glass-panel p-5 rounded-2xl border border-slate-800 shadow-lg">
@@ -1756,7 +1801,7 @@
                     </div>
                 </div>
                 <button id="gpc-export-button" onclick="downloadGPCCSV()" disabled class="disabled:opacity-40 disabled:cursor-not-allowed py-2 px-3 text-xs bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition flex items-center gap-1.5">
-                    <i data-lucide="download" class="w-4 h-4"></i> CSV İndir
+                    <i data-lucide="download" class="w-4 h-4"></i> İşlenmiş XLSX
                 </button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1773,6 +1818,20 @@
                         <div class="bg-slate-900/70 rounded-lg p-2"><div id="gpc-point-count" class="text-sm font-mono text-teal-300">0</div><div class="text-[10px] text-slate-500">Nokta</div></div>
                         <div class="bg-slate-900/70 rounded-lg p-2"><div id="gpc-peak-value" class="text-sm font-mono text-teal-300">-</div><div class="text-[10px] text-slate-500">Maksimum</div></div>
                     </div>
+                    <div class="flex flex-col gap-2 pt-2 border-t border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs text-slate-300 font-medium flex items-center gap-1.5 cursor-pointer" for="gpc-enable-smoothing">
+                                <i data-lucide="waves" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                Gürültü Azaltma
+                            </label>
+                            <input type="checkbox" id="gpc-enable-smoothing" class="w-4 h-4 accent-cyan-500 rounded cursor-pointer" onchange="renderGPC()">
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[11px] text-slate-400">Filtre Gücü:</span>
+                            <input type="range" id="gpc-smoothing-level" min="3" max="31" step="2" value="7" class="w-28 accent-cyan-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer" onchange="renderGPC()" oninput="document.getElementById('gpc-smoothing-val').innerText = this.value">
+                            <span id="gpc-smoothing-val" class="text-[10px] font-mono text-cyan-400 w-4 text-right">7</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="lg:col-span-2 glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg min-h-[480px] flex flex-col">
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
@@ -1780,6 +1839,9 @@
                         <span id="gpc-area-summary" class="text-[10px] text-teal-300 font-mono">Alan bekleniyor</span>
                     </div>
                     <div id="gpc-plotly-chart" class="w-full flex-1 min-h-[360px] rounded-lg"></div>
+                    <div class="border-t border-slate-800 mt-3 pt-3">
+                        <p id="gpc-analysis-summary" class="text-[10px] text-teal-300 font-mono">Grafik analizi bekleniyor</p>
+                    </div>
                 </div>
             </div>
             <p class="text-[10px] text-slate-500">GPC TXT verileri tarayıcınızda işlenir; ilk iki sayısal sütun X ve dedektör sinyali olarak kullanılır. Cihazın başlık ve metadata satırları otomatik ayıklanır.</p>

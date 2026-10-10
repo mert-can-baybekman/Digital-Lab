@@ -247,12 +247,14 @@ function updateXRDMLUI() {
     const fileCount = document.getElementById('xrdml-file-count');
     const scanCount = document.getElementById('xrdml-scan-count');
     const exportButton = document.getElementById('xrdml-export-button');
+    const processedExportButton = document.getElementById('xrdml-processed-export-button');
     if (!list) return;
 
     const totalScans = xrdmlFiles.reduce((total, file) => total + file.scans.length, 0);
     if (fileCount) fileCount.textContent = String(xrdmlFiles.length);
     if (scanCount) scanCount.textContent = `${totalScans} tarama`;
     if (exportButton) exportButton.disabled = totalScans === 0;
+    if (processedExportButton) processedExportButton.disabled = totalScans === 0;
 
     list.replaceChildren();
     if (xrdmlFiles.length === 0) {
@@ -318,14 +320,17 @@ function updateXRDMLPlot() {
     const visibleScans = xrdmlFiles.flatMap(file => file.scans).filter(scan => scan.visible);
     const showPeaks = document.getElementById('xrdml-show-peaks')?.checked !== false;
     const sensitivity = Number(document.getElementById('xrdml-peak-sensitivity')?.value || 5);
+    const enableSmoothing = document.getElementById('xrdml-enable-smoothing')?.checked || false;
+    const smoothingLevel = parseInt(document.getElementById('xrdml-smoothing-level')?.value || '7', 10);
     const traces = [];
     const annotations = [];
     const tablePeaks = [];
 
     visibleScans.forEach((scan, index) => {
+        const chartY = enableSmoothing ? applyXRDMLSmoothing(scan.y, smoothingLevel) : scan.y;
         traces.push({
             x: scan.x,
-            y: scan.y,
+            y: chartY,
             type: 'scatter',
             mode: 'lines',
             name: scan.label,
@@ -334,8 +339,8 @@ function updateXRDMLPlot() {
         });
 
         if (!showPeaks) return;
-        const peaks = findXRDMLPeaks(scan.x, scan.y, sensitivity);
-        const maxIntensity = getXRDMLMaxIntensity(scan.y);
+        const peaks = findXRDMLPeaks(scan.x, chartY, sensitivity);
+        const maxIntensity = getXRDMLMaxIntensity(chartY);
         const scanPeaks = peaks.map(peak => ({
             ...peak,
             scanName: scan.label,
@@ -400,6 +405,25 @@ function updateXRDMLPlot() {
     updateXRDMLPeaksTable(tablePeaks, showPeaks);
     const peakCount = document.getElementById('xrdml-detected-peak-count');
     if (peakCount) peakCount.textContent = `${tablePeaks.length} pik`;
+}
+
+function applyXRDMLSmoothing(values, windowSize) {
+    const size = Number.isFinite(windowSize) ? Math.max(3, Math.floor(windowSize)) : 7;
+    const normalized = size % 2 === 0 ? size + 1 : size;
+    if (normalized < 3 || values.length < 3) return [...values];
+    const half = Math.floor(normalized / 2);
+    return values.map((value, index) => {
+        let weightedSum = 0;
+        let weightTotal = 0;
+        for (let offset = -half; offset <= half; offset++) {
+            const sampleIndex = index + offset;
+            if (sampleIndex < 0 || sampleIndex >= values.length) continue;
+            const weight = half + 1 - Math.abs(offset);
+            weightedSum += values[sampleIndex] * weight;
+            weightTotal += weight;
+        }
+        return weightTotal ? weightedSum / weightTotal : value;
+    });
 }
 
 function findXRDMLPeaks(xValues, yValues, sensitivity = 5) {
@@ -636,6 +660,41 @@ function downloadXRDMLWorkbook() {
     if (typeof XLSX === 'undefined') {
         showToast('SheetJS Excel motoru yüklenemedi.', 'error');
         return;
+    }
+
+    function downloadXRDMLProcessedWorkbook() {
+        if (typeof XLSX === 'undefined') {
+            showToast('SheetJS Excel motoru yüklenemedi.', 'error');
+            return;
+        }
+        const allScans = xrdmlFiles.flatMap(file => file.scans.map(scan => ({ file, scan })));
+        if (allScans.length === 0) {
+            showToast('İndirilecek XRDML verisi bulunamadı.', 'warning');
+            return;
+        }
+
+        const enableSmoothing = document.getElementById('xrdml-enable-smoothing')?.checked || false;
+        const smoothingLevel = parseInt(document.getElementById('xrdml-smoothing-level')?.value || '7', 10);
+        const workbook = XLSX.utils.book_new();
+        const usedNames = new Set();
+
+        allScans.forEach(({ file, scan }) => {
+            const processedY = enableSmoothing ? applyXRDMLSmoothing(scan.y, smoothingLevel) : [...scan.y];
+            const rows = [
+                ['Dosya', file.name],
+                ['Tarama', scan.label],
+                ['Gürültü azaltma', enableSmoothing ? 'Açık' : 'Kapalı'],
+                ['Filtre gücü', smoothingLevel],
+                [],
+                [scan.axisLabel, 'Orijinal Yoğunluk (counts)', 'İşlenmiş Yoğunluk (counts)']
+            ];
+            scan.x.forEach((x, index) => rows.push([x, scan.y[index], processedY[index]]));
+            const sheetName = uniqueXRDMLSheetName(`${file.name.replace(/\.[^/.]+$/, '')}_${scan.scanNumber}_islenmis`, usedNames);
+            XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), sheetName);
+        });
+
+        XLSX.writeFile(workbook, `XRDML_Islenmis_Veriler_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        showToast('XRDML işlenmiş verileri XLSX olarak indirildi.', 'success');
     }
 
     const workbook = XLSX.utils.book_new();

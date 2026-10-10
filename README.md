@@ -23,6 +23,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
   - İnteraktif kinetik eğrisi grafiği, $t_{50\%}$ yarı ömür ve $\% \text{Conv}_{\max}$ nihai dönüşüm metrikleri.
   - Çoklu zaman serisi FTIR spektrumlarından veya doğrudan zaman-sinyal CSV dosyalarından veri çekme.
 - **Yüksek Çözünürlüklü Dışa Aktarma:** PNG (yüksek DPI), SVG ve JPEG grafik indirme; pik ve kinetik tablolarını CSV olarak kaydetme.
+- **İşlenmiş Veri Dışa Aktarma:** Yumuşatılmış/ölçeklenmiş FTIR verilerini doğrudan `.xlsx` olarak indirme.
 
 
 ---
@@ -41,6 +42,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
   - **3 Farklı Grafik Modu:** `% Bozunma Verimi vs Zaman`, `C_t / C_0 vs Zaman`, `ln(C_0 / C_t) vs Zaman`.
   - **Akıllı Süre Ayrıştırıcı (`0dk`, `15dk`, `30dk`, `60dk`):** Dosya adlarından süreleri otomatik okuma ve kronolojik sıralama.
 - **Spektrum Yönetimi:** Renk paleti seçimi, tekil/toplu görünürlük kontrolü ve yüksek kaliteli grafik çıktısı (PNG, SVG, JPEG, CSV).
+- **İşlenmiş Veri Dışa Aktarma:** Gürültü azaltılmış ve normalize edilmiş UV-Vis eğrilerini `.xlsx` formatında indirme.
 
 ---
 
@@ -60,6 +62,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
   - Taban gürültüsünü filtreleyen *prominence* (belirginlik) tabanlı $\lambda_{\max}$ tespiti.
 - **Karanlık / Aydınlık (OriginLab / Makale Beyazı) Grafik Teması:**
   - Tek tıkla akademik makale standardında beyaz zemin, siyah çerçeve ve yüksek kontrastlı grafik görünümüne geçiş ve yüksek çözünürlüklü dışa aktarma (PNG, SVG, JPG, CSV).
+- **Esnek Ölçek Çarpanı & XLSX Çıktısı:** Her spektrum için çarpan değerini doğrudan sayısal girişle ayarlama; çarpılmış + yumuşatılmış veriyi `.xlsx` olarak indirme.
 
 ---
 
@@ -70,6 +73,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 - XRDML'de dalga boyu bilgisi bulunduğunda Bragg yasası ile d-aralığı hesabı; pik sonuçlarını CSV olarak indirme.
 - Her taramayı ve birleştirilmiş pik özetini ayrı sayfalara koyan çok sekmeli Excel (.xlsx) çalışma kitabı oluşturma.
 - XML verileri tarayıcıda işlenir; dosyalar sunucuya gönderilmez.
+- İsteğe bağlı gürültü azaltma filtresi ile işlenmiş XRD eğrilerini ayrıca `.xlsx` olarak dışa aktarma.
 
 ---
 
@@ -77,11 +81,12 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 - Cihazdan alınan `.xls` veya `.xlsx` DSC çalışma kitaplarını tarayıcıda okur.
 - Sıcaklık ve ısı akışı sütunlarını otomatik algılayarak termogramı Plotly ile çizer.
 - Yerel ekstremumları endotermik/ekzotermik geçiş adayı olarak listeler ve analiz sonucunu `.xlsx` olarak dışa aktarır.
+- Gürültü azaltma sonrası eğriyle yaklaşık alan, onset/endset ve ekstremum metriklerini otomatik hesaplar.
 
 ### 6. 🧬 GPC (Gel Permeation Chromatography) Analizörü
 - GPC cihazlarının varsayılan `.txt` çıktısını okur; başlık ve metadata satırlarını otomatik atlar.
 - İlk iki sayısal sütunu X ve dedektör sinyali olarak kromatogramda gösterir.
-- Maksimum sinyal ve trapez alanını hesaplar, temizlenmiş veriyi `.csv` olarak dışa aktarır.
+- Maksimum sinyal, trapez alanı ve ağırlıklı merkez metriklerini hesaplar; işlenmiş veriyi `.xlsx` olarak dışa aktarır.
 
 ---
 

@@ -2,7 +2,7 @@
  * Dijital Laboratuvar - DSC (Differential Scanning Calorimetry) Analizörü
  */
 
-let dscState = { fileName: '', rows: [], points: [], peaks: [] };
+let dscState = { fileName: '', rows: [], points: [], processedPoints: [], peaks: [], analysis: null };
 
 function initDSCModule() {
     const dropZone = document.getElementById('dsc-drop-zone');
@@ -43,7 +43,7 @@ function handleDSCFile(file) {
             const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
             const points = extractDSCPoints(rows);
             if (points.length < 2) throw new Error('İlk sayfada iki sayısal DSC sütunu bulunamadı.');
-            dscState = { fileName: file.name, rows, points, peaks: findDSCPeaks(points) };
+            dscState = { fileName: file.name, rows, points, processedPoints: [], peaks: [], analysis: null };
             renderDSC();
             showToast(`"${file.name}" DSC analizine yüklendi.`, 'success');
         } catch (error) {
@@ -99,9 +99,61 @@ function findDSCPeaks(points) {
     return peaks.filter((peak, index) => index === 0 || Math.abs(peak.x - peaks[index - 1].x) > (points[points.length - 1].x - points[0].x) * 0.01).slice(0, 30);
 }
 
+function applyDSCSmoothing(points, windowSize) {
+    if (points.length < 3) return points.map(point => ({ ...point }));
+    const size = Number.isFinite(windowSize) ? Math.max(3, Math.floor(windowSize)) : 7;
+    const normalized = size % 2 === 0 ? size + 1 : size;
+    if (normalized < 3) return points.map(point => ({ ...point }));
+    const half = Math.floor(normalized / 2);
+    return points.map((point, index) => {
+        let weightedSum = 0;
+        let weightTotal = 0;
+        for (let offset = -half; offset <= half; offset++) {
+            const sampleIndex = index + offset;
+            if (sampleIndex < 0 || sampleIndex >= points.length) continue;
+            const weight = half + 1 - Math.abs(offset);
+            weightedSum += points[sampleIndex].y * weight;
+            weightTotal += weight;
+        }
+        return { x: point.x, y: weightTotal ? weightedSum / weightTotal : point.y };
+    });
+}
+
+function analyzeDSCCurve(points, peaks) {
+    if (!points.length) return null;
+    const ys = points.map(point => point.y);
+    const maxPoint = points[ys.indexOf(Math.max(...ys))];
+    const minPoint = points[ys.indexOf(Math.min(...ys))];
+    const onset = peaks.length ? peaks.reduce((best, peak) => peak.x < best.x ? peak : best, peaks[0]) : null;
+    const endset = peaks.length ? peaks.reduce((best, peak) => peak.x > best.x ? peak : best, peaks[0]) : null;
+    const baseline = (points[0].y + points[points.length - 1].y) / 2;
+    let area = 0;
+    for (let i = 1; i < points.length; i++) {
+        const left = points[i - 1];
+        const right = points[i];
+        area += (right.x - left.x) * (((left.y - baseline) + (right.y - baseline)) / 2);
+    }
+    return { maxPoint, minPoint, onset, endset, area };
+}
+
 function renderDSC() {
-    const points = dscState.points;
-    const peaks = dscState.peaks;
+    if (!dscState.points.length) {
+        const summaryEl = document.getElementById('dsc-analysis-summary');
+        const extEl = document.getElementById('dsc-analysis-extrema');
+        if (summaryEl) summaryEl.textContent = 'Grafik analizi bekleniyor';
+        if (extEl) extEl.textContent = 'Yüklenen DSC eğrisinden otomatik metrikler hesaplanır.';
+        return;
+    }
+
+    const enableSmoothing = document.getElementById('dsc-enable-smoothing')?.checked || false;
+    const smoothingLevel = parseInt(document.getElementById('dsc-smoothing-level')?.value || '7', 10);
+    const points = enableSmoothing ? applyDSCSmoothing(dscState.points, smoothingLevel) : dscState.points.map(point => ({ ...point }));
+    const peaks = findDSCPeaks(points);
+    const analysis = analyzeDSCCurve(points, peaks);
+    dscState.processedPoints = points;
+    dscState.peaks = peaks;
+    dscState.analysis = analysis;
+
     document.getElementById('dsc-file-info').textContent = `${dscState.fileName} • ${points.length} veri noktası`;
     document.getElementById('dsc-point-count').textContent = points.length;
     document.getElementById('dsc-peak-count').textContent = peaks.length;
@@ -111,6 +163,17 @@ function renderDSC() {
     document.getElementById('dsc-peaks-table-body').innerHTML = peaks.length ? peaks.map(peak => `
         <tr><td class="p-2">${peak.type}</td><td class="p-2 font-mono">${peak.x.toFixed(3)}</td><td class="p-2 font-mono">${peak.y.toFixed(5)}</td><td class="p-2 text-slate-400">Yerel ekstremum</td></tr>
     `).join('') : '<tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Belirgin termal pik bulunamadı.</td></tr>';
+    if (analysis) {
+        const summary = [
+            `Alan≈ ${analysis.area.toFixed(3)}`,
+            analysis.onset ? `Onset≈ ${analysis.onset.x.toFixed(2)}` : null,
+            analysis.endset ? `Endset≈ ${analysis.endset.x.toFixed(2)}` : null
+        ].filter(Boolean).join(' • ');
+        const summaryEl = document.getElementById('dsc-analysis-summary');
+        if (summaryEl) summaryEl.textContent = summary;
+        const extEl = document.getElementById('dsc-analysis-extrema');
+        if (extEl) extEl.textContent = `Max ${analysis.maxPoint.y.toFixed(3)} @ ${analysis.maxPoint.x.toFixed(2)} | Min ${analysis.minPoint.y.toFixed(3)} @ ${analysis.minPoint.x.toFixed(2)}`;
+    }
     Plotly.react('dsc-plotly-chart', [{
         x: points.map(point => point.x), y: points.map(point => point.y), mode: 'lines', name: 'DSC', line: { color: '#f87171', width: 2 }
     }, {
@@ -127,8 +190,19 @@ function renderDSC() {
 function downloadDSCWorkbook() {
     if (!dscState.points.length || typeof XLSX === 'undefined') return;
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Sıcaklık', 'Isı akışı'], ...dscState.points.map(point => [point.x, point.y])]), 'DSC Verisi');
+    const processedPoints = dscState.processedPoints.length ? dscState.processedPoints : dscState.points;
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Sıcaklık', 'Orijinal Isı akışı', 'İşlenmiş Isı akışı'], ...dscState.points.map((point, index) => [point.x, point.y, processedPoints[index]?.y ?? ''])]), 'DSC Verisi');
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Tür', 'Sıcaklık', 'Isı akışı'], ...dscState.peaks.map(peak => [peak.type, peak.x, peak.y])]), 'Termal Pikler');
+    if (dscState.analysis) {
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+            ['Metrik', 'Değer'],
+            ['İntegral alan (yaklaşık)', dscState.analysis.area],
+            ['Onset (yaklaşık)', dscState.analysis.onset ? dscState.analysis.onset.x : ''],
+            ['Endset (yaklaşık)', dscState.analysis.endset ? dscState.analysis.endset.x : ''],
+            ['Maksimum nokta', `${dscState.analysis.maxPoint.x} / ${dscState.analysis.maxPoint.y}`],
+            ['Minimum nokta', `${dscState.analysis.minPoint.x} / ${dscState.analysis.minPoint.y}`]
+        ]), 'Grafik Analizi');
+    }
     XLSX.writeFile(workbook, `DSC_Analizi_${new Date().toISOString().slice(0, 10)}.xlsx`);
     showToast('DSC analiz Excel dosyası indirildi.', 'success');
 }

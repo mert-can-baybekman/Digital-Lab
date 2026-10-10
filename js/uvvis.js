@@ -701,6 +701,43 @@ function downloadUVVisChart(format = 'png') {
     });
 }
 
+function downloadUVVisProcessedWorkbook() {
+    if (typeof XLSX === 'undefined') {
+        showToast('SheetJS Excel motoru yüklenemedi.', 'error');
+        return;
+    }
+    if (uvvisSpectraList.length === 0) {
+        showToast('İndirilecek UV-Vis verisi bulunmuyor.', 'warning');
+        return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const yMode = document.getElementById('uvvis-y-mode')?.value || 'raw';
+    const normalize = document.getElementById('uvvis-normalize-y')?.checked || false;
+    const enableSmoothing = document.getElementById('uvvis-enable-smoothing')?.checked || false;
+    const smoothingLevel = parseInt(document.getElementById('uvvis-smoothing-level')?.value || '7', 10);
+
+    uvvisSpectraList.forEach(spec => {
+        const rows = [
+            ['Spektrum', spec.name],
+            ['Y modu', yMode],
+            ['Min-Max normalizasyon', normalize ? 'Açık' : 'Kapalı'],
+            ['Gürültü azaltma', enableSmoothing ? 'Açık' : 'Kapalı'],
+            ['Filtre gücü', smoothingLevel],
+            [],
+            ['Dalga Boyu (nm)', 'Orijinal Y', 'İşlenmiş Y']
+        ];
+        spec.rawX.forEach((x, index) => {
+            rows.push([x, spec.rawY[index], spec.processedY[index] ?? '']);
+        });
+        const sheetName = (spec.name.replace(/[:\\/?*\[\]]/g, '').slice(0, 31) || 'UVVis').trim();
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), sheetName);
+    });
+
+    XLSX.writeFile(workbook, `UVVis_Islenmis_Veriler_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    showToast('UV-Vis işlenmiş verileri XLSX olarak indirildi.', 'success');
+}
+
 function updateUVVisSpectraUIList() {
     const container = document.getElementById('uvvis-spectra-list');
     const countEl = document.getElementById('uvvis-spectrum-count');
@@ -1436,4 +1473,3 @@ function downloadDegradationChart(format = 'png') {
         showToast('Görsel indirilirken hata oluştu.', 'error');
     });
 }
-
