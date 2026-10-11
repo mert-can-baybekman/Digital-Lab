@@ -30,19 +30,24 @@ const irCorrelationData = [
 function initCalculatorsModule() {
     renderIRCorrelationTable();
     initCalibrationPlot();
+    const jablonskiButton = document.getElementById('jablonski-calculate-button');
+    if (jablonskiButton && !jablonskiButton.dataset.bound) {
+        jablonskiButton.addEventListener('click', calculateJablonskiDiagram);
+        jablonskiButton.dataset.bound = 'true';
+    }
 }
 
 // Jablonski Diyagramı ve Foton Enerjisi Hesaplayıcısı
 function calculateJablonskiDiagram() {
     const fields = {
-        absorption1: document.getElementById('jablonski-absorption-1')?.value,
-        absorption2: document.getElementById('jablonski-absorption-2')?.value,
-        fluorescence: document.getElementById('jablonski-fluorescence')?.value,
-        phosphorescence: document.getElementById('jablonski-phosphorescence')?.value
+        absorption1: document.getElementById('jablonski-absorption-1')?.valueAsNumber,
+        absorption2: document.getElementById('jablonski-absorption-2')?.valueAsNumber,
+        fluorescence: document.getElementById('jablonski-fluorescence')?.valueAsNumber,
+        phosphorescence: document.getElementById('jablonski-phosphorescence')?.valueAsNumber
     };
     const wavelengths = {};
     Object.entries(fields).forEach(([key, value]) => {
-        if (String(value || '').trim() !== '') wavelengths[key] = Number(String(value).replace(',', '.'));
+        if (Number.isFinite(value)) wavelengths[key] = value;
     });
 
     if (!Number.isFinite(wavelengths.absorption1) || !Number.isFinite(wavelengths.fluorescence) || !Number.isFinite(wavelengths.phosphorescence)

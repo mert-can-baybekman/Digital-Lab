@@ -2064,11 +2064,13 @@
                                     <input type="number" id="jablonski-phosphorescence" min="1" step="any" placeholder="örn: 600" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 mt-1 focus:ring-1 focus:ring-violet-500 outline-none">
                                 </div>
                             </div>
-                            <button onclick="calculateJablonskiDiagram()" class="w-full py-2 px-3 text-xs bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold transition flex items-center justify-center gap-1.5 shadow-md shadow-violet-600/20">
+                            <button type="button" id="jablonski-calculate-button" class="w-full py-2 px-3 text-xs bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold transition flex items-center justify-center gap-1.5 shadow-md shadow-violet-600/20">
                                 <i data-lucide="play" class="w-3.5 h-3.5"></i>
                                 Diyagramı Hesapla ve Çiz
                             </button>
-                            <div id="jablonski-result-box" class="hidden p-3 bg-slate-900/90 border border-violet-500/30 rounded-xl">
+                            <div id="jablonski-result-box" class="hidden p-3 bg-slate-900/90 border border-violet-500/30 rounded-xl space-y-2">
+                                <p class="text-[10px] uppercase tracking-wider text-violet-300 font-semibold">Hesaplama Sonucu</p>
+                                <p class="text-[10px] text-slate-500 font-mono">E = 1239.841984 / λ (nm)</p>
                                 <div id="jablonski-result-text" class="text-[11px] text-slate-300 space-y-1"></div>
                             </div>
                         </div>
