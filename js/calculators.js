@@ -32,6 +32,134 @@ function initCalculatorsModule() {
     initCalibrationPlot();
 }
 
+// Jablonski Diyagramı ve Foton Enerjisi Hesaplayıcısı
+function calculateJablonskiDiagram() {
+    const fields = {
+        absorption1: document.getElementById('jablonski-absorption-1')?.value,
+        absorption2: document.getElementById('jablonski-absorption-2')?.value,
+        fluorescence: document.getElementById('jablonski-fluorescence')?.value,
+        phosphorescence: document.getElementById('jablonski-phosphorescence')?.value
+    };
+    const wavelengths = {};
+    Object.entries(fields).forEach(([key, value]) => {
+        if (String(value || '').trim() !== '') wavelengths[key] = Number(String(value).replace(',', '.'));
+    });
+
+    if (!Number.isFinite(wavelengths.absorption1) || !Number.isFinite(wavelengths.fluorescence) || !Number.isFinite(wavelengths.phosphorescence)
+        || wavelengths.absorption1 <= 0 || wavelengths.fluorescence <= 0 || wavelengths.phosphorescence <= 0) {
+        showToast('Absorpsiyon 1, floresans ve fosforesans dalgaboylarını girin.', 'warning');
+        return;
+    }
+    const invalid = Object.entries(wavelengths).some(([, value]) => !Number.isFinite(value) || value <= 0);
+    if (invalid) {
+        showToast('Dalgaboyları 0’dan büyük geçerli sayılar olmalıdır.', 'warning');
+        return;
+    }
+
+    const energy = wavelength => 1239.841984 / wavelength;
+    const energies = {
+        absorption1: energy(wavelengths.absorption1),
+        absorption2: wavelengths.absorption2 ? energy(wavelengths.absorption2) : null,
+        fluorescence: wavelengths.fluorescence ? energy(wavelengths.fluorescence) : null,
+        phosphorescence: wavelengths.phosphorescence ? energy(wavelengths.phosphorescence) : null
+    };
+
+    if (energies.absorption2 !== null && energies.absorption2 <= energies.absorption1) {
+        showToast('Absorpsiyon 2, S2 için Absorpsiyon 1’den daha yüksek enerjili olmalıdır.', 'warning');
+        return;
+    }
+    if (energies.fluorescence >= energies.absorption1 || energies.phosphorescence >= energies.absorption1) {
+        showToast('Işıma enerjileri absorpsiyon enerjisinden yüksek; değerleri fiziksel olarak kontrol edin.', 'warning');
+    }
+
+    drawJablonskiDiagram(energies);
+    const resultBox = document.getElementById('jablonski-result-box');
+    const resultText = document.getElementById('jablonski-result-text');
+    if (resultBox && resultText) {
+        const rows = [
+            ['Absorpsiyon 1', wavelengths.absorption1, energies.absorption1],
+            ['Absorpsiyon 2', wavelengths.absorption2, energies.absorption2],
+            ['Floresans', wavelengths.fluorescence, energies.fluorescence],
+            ['Fosforesans', wavelengths.phosphorescence, energies.phosphorescence]
+        ].filter(([, nm]) => nm !== undefined && nm !== null);
+        resultText.innerHTML = rows.map(([label, nm, ev]) =>
+            `<p><span class="text-slate-400">${label}:</span> <strong class="text-violet-300">${Number(nm).toFixed(2)} nm</strong> → <strong class="text-amber-300">${Number(ev).toFixed(4)} eV</strong></p>`
+        ).join('');
+        resultBox.classList.remove('hidden');
+    }
+    showToast('Jablonski diyagramı hesaplandı!', 'success');
+}
+
+function drawJablonskiDiagram(energies) {
+    const svg = document.getElementById('jablonski-diagram');
+    if (!svg) return;
+
+    const maxEnergy = Math.max(
+        energies.absorption1,
+        energies.absorption2 || 0,
+        energies.fluorescence || 0,
+        energies.phosphorescence || 0,
+        1
+    );
+    const top = 42;
+    const bottom = 365;
+    const levelY = energy => bottom - (energy / maxEnergy) * 285;
+    const s0Y = bottom;
+    const s1Y = levelY(energies.absorption1);
+    const s2Y = energies.absorption2 ? levelY(energies.absorption2) : null;
+    const t1Energy = energies.phosphorescence || Math.max(energies.absorption1 * 0.55, 0.1);
+    const t1Y = levelY(t1Energy);
+    const safe = value => Number(value).toFixed(1);
+    const line = (x1, y1, x2, y2, stroke, width = 4, dash = '') =>
+        `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${width}" ${dash ? `stroke-dasharray="${dash}"` : ''} stroke-linecap="round"/>`;
+    const label = (x, y, text, color = '#cbd5e1', anchor = 'start', size = 13) =>
+        `<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" font-size="${size}" font-family="Inter, sans-serif">${text}</text>`;
+    const arrow = (x1, y1, x2, y2, color, marker, dash = '') =>
+        `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="3" ${dash ? `stroke-dasharray="${dash}"` : ''} marker-end="url(#${marker})"/>`;
+    const zigzag = (x1, y1, x2, y2, color) => {
+        const segments = 8;
+        const dx = (x2 - x1) / segments;
+        const dy = (y2 - y1) / segments;
+        const points = [`${x1},${y1}`];
+        for (let i = 1; i < segments; i++) {
+            points.push(`${x1 + dx * i},${y1 + dy * i + (i % 2 ? -7 : 7)}`);
+        }
+        points.push(`${x2},${y2}`);
+        return `<polyline points="${points.join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#marker-ic)"/>`;
+    };
+
+    const parts = [`
+        <defs>
+            <marker id="marker-abs" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399"/></marker>
+            <marker id="marker-fl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#fde047"/></marker>
+            <marker id="marker-ph" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#fb923c"/></marker>
+            <marker id="marker-ic" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a78bfa"/></marker>
+        </defs>
+        <rect x="0" y="0" width="760" height="420" rx="12" fill="#020617"/>
+        ${label(200, 25, 'Singlet durumları', '#c4b5fd', 'middle', 14)}
+        ${label(560, 25, 'Triplet durumları', '#fdba74', 'middle', 14)}
+        ${line(120, s0Y, 330, s0Y, '#e2e8f0')}
+        ${line(450, s0Y, 670, s0Y, '#e2e8f0')}
+        ${label(92, s0Y + 5, 'S₀', '#f8fafc', 'end', 16)}
+        ${label(345, s0Y + 5, '0.000 eV', '#94a3b8', 'start', 12)}
+        ${line(120, s1Y, 330, s1Y, '#c4b5fd')}
+        ${label(92, s1Y + 5, 'S₁', '#c4b5fd', 'end', 16)}
+        ${label(345, s1Y + 5, `${safe(energies.absorption1)} eV`, '#c4b5fd', 'start', 12)}
+        ${s2Y !== null ? `${line(120, s2Y, 330, s2Y, '#a78bfa')}${label(92, s2Y + 5, 'S₂', '#a78bfa', 'end', 16)}${label(345, s2Y + 5, `${safe(energies.absorption2)} eV`, '#a78bfa', 'start', 12)}` : ''}
+        ${line(450, t1Y, 670, t1Y, '#fdba74')}
+        ${label(422, t1Y + 5, 'T₁', '#fdba74', 'end', 16)}
+        ${label(685, t1Y + 5, `${safe(t1Energy)} eV`, '#fdba74', 'start', 12)}
+        ${arrow(155, s0Y - 3, 155, s1Y + 3, '#34d399', 'marker-abs')}
+        ${label(155, (s0Y + s1Y) / 2, 'Abs 1', '#34d399', 'middle', 11)}
+        ${s2Y !== null ? `${arrow(245, s0Y - 3, 245, s2Y + 3, '#60a5fa', 'marker-abs')}${label(245, (s0Y + s2Y) / 2, 'Abs 2', '#60a5fa', 'middle', 11)}${zigzag(300, s2Y + 4, 300, s1Y - 4, '#a78bfa')}${label(310, (s2Y + s1Y) / 2, 'IC', '#a78bfa', 'start', 11)}` : ''}
+        ${energies.fluorescence !== null ? `${arrow(285, s1Y + 4, 285, s0Y - 4, '#fde047', 'marker-fl')}${label(300, (s1Y + s0Y) / 2, 'Floresans', '#fde047', 'start', 11)}` : ''}
+        ${energies.phosphorescence !== null ? `${arrow(610, t1Y + 4, 610, s0Y - 4, '#fb923c', 'marker-ph', '8 5')}${label(625, (t1Y + s0Y) / 2, 'Fosforesans', '#fb923c', 'start', 11)}` : ''}
+        ${energies.phosphorescence !== null ? `${zigzag(335, s1Y, 545, t1Y, '#f472b6')}${label(440, Math.min(s1Y, t1Y) - 13, 'ISC', '#f472b6', 'middle', 11)}` : ''}
+        ${label(200, 402, 'S₀ = temel durum', '#64748b', 'middle', 11)}
+    `];
+    svg.innerHTML = parts.join('');
+}
+
 // 1. Beer-Lambert Kanunu Hesaplayıcısı (A = ε * b * c)
 function calculateBeerLambert() {
     const calcTarget = document.getElementById('bl-calc-target')?.value || 'A';
