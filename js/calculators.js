@@ -86,7 +86,7 @@ function calculateJablonskiDiagram() {
             ['Fosforesans', wavelengths.phosphorescence, energies.phosphorescence]
         ].filter(([, nm]) => nm !== undefined && nm !== null);
         resultText.innerHTML = `
-            <p class="text-slate-400">E (eV) =
+            <p class="text-slate-400">E = h·c / λ<br>E (eV) =
                 <strong class="text-slate-200">(6.62607015 × 10⁻³⁴ × 299792458) /
                 (λ × 10⁻⁹ × 1.602176634 × 10⁻¹⁹)</strong>
                 = <strong class="text-amber-300">1239.841984 / λ</strong></p>
