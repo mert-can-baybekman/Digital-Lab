@@ -30,11 +30,6 @@ const irCorrelationData = [
 function initCalculatorsModule() {
     renderIRCorrelationTable();
     initCalibrationPlot();
-    const jablonskiButton = document.getElementById('jablonski-calculate-button');
-    if (jablonskiButton && !jablonskiButton.dataset.bound) {
-        jablonskiButton.addEventListener('click', calculateJablonskiDiagram);
-        jablonskiButton.dataset.bound = 'true';
-    }
 }
 
 // Jablonski Diyagramı ve Foton Enerjisi Hesaplayıcısı
@@ -61,7 +56,10 @@ function calculateJablonskiDiagram() {
         return;
     }
 
-    const energy = wavelength => 1239.841984 / wavelength;
+    const planck = 6.62607015e-34;
+    const lightSpeed = 299792458;
+    const electronVolt = 1.602176634e-19;
+    const energy = wavelength => (planck * lightSpeed) / (wavelength * 1e-9 * electronVolt);
     const energies = {
         absorption1: energy(wavelengths.absorption1),
         absorption2: wavelengths.absorption2 ? energy(wavelengths.absorption2) : null,
@@ -87,13 +85,20 @@ function calculateJablonskiDiagram() {
             ['Floresans', wavelengths.fluorescence, energies.fluorescence],
             ['Fosforesans', wavelengths.phosphorescence, energies.phosphorescence]
         ].filter(([, nm]) => nm !== undefined && nm !== null);
-        resultText.innerHTML = rows.map(([label, nm, ev]) =>
+        resultText.innerHTML = `
+            <p class="text-slate-400">E (eV) =
+                <strong class="text-slate-200">(6.62607015 × 10⁻³⁴ × 299792458) /
+                (λ × 10⁻⁹ × 1.602176634 × 10⁻¹⁹)</strong>
+                = <strong class="text-amber-300">1239.841984 / λ</strong></p>
+            ${rows.map(([label, nm, ev]) =>
             `<p><span class="text-slate-400">${label}:</span> <strong class="text-violet-300">${Number(nm).toFixed(2)} nm</strong> → <strong class="text-amber-300">${Number(ev).toFixed(4)} eV</strong></p>`
-        ).join('');
+            ).join('')}`;
         resultBox.classList.remove('hidden');
     }
     showToast('Jablonski diyagramı hesaplandı!', 'success');
 }
+
+window.calculateJablonskiDiagram = calculateJablonskiDiagram;
 
 function drawJablonskiDiagram(energies) {
     const svg = document.getElementById('jablonski-diagram');
