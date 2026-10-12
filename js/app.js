@@ -6,6 +6,7 @@
 const DigitalLab = {
     currentTab: 'hub',
     recentTabs: [],
+    commandPaletteIndex: 0,
     stats: {
         spectraAnalyzed: 0,
         filesConverted: 0,
@@ -137,6 +138,7 @@ function initCommandPalette() {
     }
 
     input.addEventListener('input', () => renderCommandPaletteResults(input.value));
+    input.addEventListener('keydown', handleCommandPaletteKeydown);
     palette.addEventListener('click', event => {
         if (event.target === palette) closeCommandPalette();
     });
@@ -158,14 +160,16 @@ function renderCommandPaletteResults(query = '') {
     const matches = commandPaletteModules
         .filter(module => !normalized || `${module.name} ${module.keywords}`.toLocaleLowerCase('tr-TR').includes(normalized))
         .sort((a, b) => (recentRank.get(a.id) ?? 99) - (recentRank.get(b.id) ?? 99));
+    DigitalLab.commandPaletteIndex = Math.min(DigitalLab.commandPaletteIndex, Math.max(matches.length - 1, 0));
 
     if (!matches.length) {
         results.innerHTML = '<p class="px-3 py-5 text-center text-xs text-slate-500">Eşleşen modül bulunamadı.</p>';
         return;
     }
-    results.innerHTML = matches.map(module => {
+    results.innerHTML = matches.map((module, index) => {
         const recent = recentRank.has(module.id);
-        return `<button type="button" data-command-tab="${module.id}" class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-slate-800 transition group" role="option">
+        const selected = index === DigitalLab.commandPaletteIndex;
+        return `<button type="button" data-command-tab="${module.id}" aria-selected="${selected}" class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left ${selected ? 'bg-slate-800 ring-1 ring-indigo-500/50' : ''} hover:bg-slate-800 transition group" role="option">
             <span class="flex items-center gap-3">
                 <span class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center"><i data-lucide="${module.id === 'calculators' ? 'calculator' : module.id === 'hub' ? 'layout-grid' : 'flask-conical'}" class="w-4 h-4 text-indigo-400"></i></span>
                 <span><span class="block text-xs font-semibold text-slate-200 group-hover:text-white">${module.name}</span><span class="block text-[10px] text-slate-500">${module.keywords}</span></span>
@@ -182,6 +186,22 @@ function renderCommandPaletteResults(query = '') {
     lucide.createIcons();
 }
 
+function handleCommandPaletteKeydown(event) {
+    const results = document.querySelectorAll('[data-command-tab]');
+    if (!results.length) return;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+        DigitalLab.commandPaletteIndex = (DigitalLab.commandPaletteIndex + direction + results.length) % results.length;
+        renderCommandPaletteResults(document.getElementById('command-palette-input')?.value || '');
+        return;
+    }
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        results[DigitalLab.commandPaletteIndex]?.click();
+    }
+}
+
 function openCommandPalette() {
     const palette = document.getElementById('command-palette');
     const input = document.getElementById('command-palette-input');
@@ -189,6 +209,7 @@ function openCommandPalette() {
     palette.classList.remove('hidden');
     palette.classList.add('flex');
     input.value = '';
+    DigitalLab.commandPaletteIndex = 0;
     renderCommandPaletteResults();
     requestAnimationFrame(() => input.focus());
 }
