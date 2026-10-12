@@ -59,15 +59,15 @@
                     <div class="shrink-0 p-2 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-xl shadow-lg shadow-indigo-500/20">
                         <i data-lucide="flask-conical" class="w-5 h-5 text-white"></i>
                     </div>
-                    <div class="min-w-0 flex items-center">
-                        <span class="max-w-[9rem] sm:max-w-none truncate whitespace-nowrap text-sm sm:text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200">
+                    <div class="shrink-0 flex items-center">
+                        <span class="whitespace-nowrap text-sm sm:text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200">
                             Dijital Laboratuvar
                         </span>
                     </div>
                 </div>
 
                 <!-- Masaüstü Sekme Butonları -->
-                <nav class="hidden lg:flex items-center space-x-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800/80">
+                <nav class="hidden lg:flex min-w-0 flex-1 items-center justify-center space-x-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800/80 overflow-x-auto scrollbar-none">
                     <button onclick="switchTab('hub')" data-tab="hub" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
                         <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
                         <span>Hub</span>
@@ -111,12 +111,10 @@
                 </nav>
 
                 <!-- Sağ Menü -->
-                <div class="flex items-center space-x-3">
+                <div class="shrink-0 flex items-center space-x-3">
                     <button type="button" onclick="openCommandPalette()" aria-label="Modül arama panelini aç"
-                       class="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 px-3 py-1.5 rounded-lg transition shadow-sm">
-                        <i data-lucide="command" class="w-3.5 h-3.5"></i>
-                        <span>Hızlı Ara</span>
-                        <kbd class="text-[10px] font-mono text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">Ctrl K</kbd>
+                       class="hidden sm:flex items-center justify-center w-9 h-9 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 rounded-lg transition shadow-sm" title="Hızlı ara (Ctrl/Cmd + K)">
+                        <i data-lucide="search" class="w-4 h-4"></i>
                     </button>
                     <a href="https://github.com/mert-can-baybekman" target="_blank" rel="noopener noreferrer"
                        class="flex items-center space-x-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 px-3 py-1.5 rounded-lg transition shadow-sm">
