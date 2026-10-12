@@ -137,6 +137,7 @@ function applyFTIRSmoothing(yValues, windowSize) {
 function processAndPlotFTIRData() {
     const yMode = document.getElementById('ftir-y-mode')?.value || 'raw';
     const normalize = document.getElementById('ftir-normalize-y')?.checked || false;
+    const baselineCorrection = document.getElementById('ftir-baseline-correction')?.checked || false;
     const enableSmoothing = document.getElementById('ftir-enable-smoothing')?.checked || false;
     const smoothingLevel = parseInt(document.getElementById('ftir-smoothing-level')?.value || '7');
     const stackOffset = parseFloat(document.getElementById('ftir-stack-offset')?.value || '0');
@@ -158,6 +159,10 @@ function processAndPlotFTIRData() {
         } else if (yMode === 'absorbance_to_transmittance') {
             // %T = 10^(2 - A)
             yValues = yValues.map(a => Math.pow(10, 2 - a));
+        }
+
+        if (baselineCorrection) {
+            yValues = applyLinearBaselineCorrection(yValues);
         }
 
         // Gürültü Azaltma Filtresi
@@ -1247,4 +1252,3 @@ function downloadKineticsChart(format = 'png') {
         showToast('Görsel indirilirken hata oluştu.', 'error');
     });
 }
-

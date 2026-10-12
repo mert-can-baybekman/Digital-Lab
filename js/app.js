@@ -256,6 +256,14 @@ function scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function applyLinearBaselineCorrection(values) {
+    if (!Array.isArray(values) || values.length < 3) return Array.isArray(values) ? [...values] : [];
+    const first = values[0];
+    const last = values[values.length - 1];
+    const slope = (last - first) / (values.length - 1);
+    return values.map((value, index) => value - (first + slope * index));
+}
+
 const chartStyleTargets = [
     ['ftir-plotly-chart', 'FTIR'],
     ['uvvis-plotly-chart', 'UV-Vis'],

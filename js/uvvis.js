@@ -274,6 +274,7 @@ function applyUVVisSmoothing(yValues, windowSize) {
 function processAndPlotUVVisData() {
     const yMode = document.getElementById('uvvis-y-mode')?.value || 'raw';
     const normalize = document.getElementById('uvvis-normalize-y')?.checked || false;
+    const baselineCorrection = document.getElementById('uvvis-baseline-correction')?.checked || false;
     const enableSmoothing = document.getElementById('uvvis-enable-smoothing')?.checked || false;
     const smoothingLevel = parseInt(document.getElementById('uvvis-smoothing-level')?.value || '7');
     const stackOffset = parseFloat(document.getElementById('uvvis-stack-offset')?.value || '0');
@@ -292,6 +293,10 @@ function processAndPlotUVVisData() {
             });
         } else if (yMode === 'absorbance_to_transmittance') {
             yValues = yValues.map(a => Math.pow(10, 2 - a));
+        }
+
+        if (baselineCorrection) {
+            yValues = applyLinearBaselineCorrection(yValues);
         }
 
         if (enableSmoothing) {

@@ -116,6 +116,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 - **Klavye ile Komut Paleti Kullanımı:** Arama sonuçları `↑/↓` ile seçilebilir, `Enter` ile açılabilir; seçili sonuç görsel olarak vurgulanır ve erişilebilirlik durumları güncellenir.
 - **Hub Arama Kısayolu ve Yukarı Çık:** Hub araması `Esc` ile temizlenebilir; uzun sayfalarda görünür olan yukarı çık düğmesiyle başa dönülebilir.
 - **Ortak Grafik Stil Araç Çubuğu:** FTIR, UV-Vis, Floresans, XRD, DSC ve GPC grafiklerinde çizgi rengi, kalınlığı, çizgi tipi, nokta görünümü ve ızgara görünümü veri yüklenmeden önce veya sonra kolayca değiştirilebilir.
+- **FTIR ve UV-Vis Taban Çizgisi Düzeltmesi:** İlk ve son ölçüm noktaları arasındaki doğrusal cihaz driftini işlenmiş veriden çıkarır; smoothing, normalizasyon ve işlenmiş XLSX dışa aktarmayla birlikte çalışır.
 
 ---
 

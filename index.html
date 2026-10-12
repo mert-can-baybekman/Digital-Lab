@@ -596,6 +596,12 @@
                             </label>
                             <input type="checkbox" id="ftir-normalize-y" class="w-4 h-4 accent-blue-500 rounded cursor-pointer" onchange="processAndPlotFTIRData()">
                         </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs text-slate-300 cursor-pointer" for="ftir-baseline-correction" title="İlk ve son veri noktası arasındaki doğrusal baz çizgiyi çıkarır">
+                                Doğrusal Taban Çizgisi Düzeltmesi
+                            </label>
+                            <input type="checkbox" id="ftir-baseline-correction" class="w-4 h-4 accent-blue-500 rounded cursor-pointer" onchange="processAndPlotFTIRData()">
+                        </div>
 
                         <!-- Gürültü Azaltma (Yumuşatma) -->
                         <div class="flex flex-col gap-2 pt-2 border-t border-slate-800">
@@ -973,6 +979,12 @@
                                 Min-Max Normalizasyonu (0 - 1)
                             </label>
                             <input type="checkbox" id="uvvis-normalize-y" class="w-4 h-4 accent-purple-500 rounded cursor-pointer" onchange="processAndPlotUVVisData()">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs text-slate-300 cursor-pointer" for="uvvis-baseline-correction" title="İlk ve son veri noktası arasındaki doğrusal baz çizgiyi çıkarır">
+                                Doğrusal Taban Çizgisi Düzeltmesi
+                            </label>
+                            <input type="checkbox" id="uvvis-baseline-correction" class="w-4 h-4 accent-purple-500 rounded cursor-pointer" onchange="processAndPlotUVVisData()">
                         </div>
 
                         <!-- Gürültü Azaltma (Yumuşatma) -->
