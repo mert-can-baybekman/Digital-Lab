@@ -32,6 +32,50 @@ function initCalculatorsModule() {
     initCalibrationPlot();
 }
 
+function getCalculatorNumber(id) {
+    return document.getElementById(id)?.valueAsNumber;
+}
+
+function calculateDilution() {
+    const c1 = getCalculatorNumber('dilution-c1');
+    const c2 = getCalculatorNumber('dilution-c2');
+    const v2 = getCalculatorNumber('dilution-v2');
+    const result = document.getElementById('dilution-result-box');
+    const v1Field = document.getElementById('dilution-v1');
+    if (![c1, c2, v2].every(value => Number.isFinite(value) && value > 0) || c2 > c1) {
+        showToast('C₁, C₂ ve V₂ pozitif olmalı; hedef derişim stoktan büyük olamaz.', 'warning');
+        return;
+    }
+    const v1 = (c2 * v2) / c1;
+    const solvent = v2 - v1;
+    v1Field.value = v1.toFixed(4);
+    result.innerHTML = `<p class="font-semibold text-rose-300">Hazırlama talimatı</p>
+        <p><strong>${v1.toFixed(4)} mL</strong> stok çözeltiden alın ve hacmi çözücü ile <strong>${v2.toFixed(4)} mL</strong>'ye tamamlayın.</p>
+        <p class="text-slate-400">Eklenecek yaklaşık çözücü: <strong>${solvent.toFixed(4)} mL</strong></p>
+        <p class="text-[10px] text-slate-500 font-mono mt-1">V₁ = (C₂ × V₂) / C₁ = (${c2} × ${v2}) / ${c1}</p>`;
+    result.classList.remove('hidden');
+}
+
+function calculateArrhenius() {
+    const k1 = getCalculatorNumber('arrhenius-k1');
+    const k2 = getCalculatorNumber('arrhenius-k2');
+    const t1 = getCalculatorNumber('arrhenius-t1');
+    const t2 = getCalculatorNumber('arrhenius-t2');
+    const result = document.getElementById('arrhenius-result-box');
+    if (![k1, k2, t1, t2].every(value => Number.isFinite(value) && value > 0) || t1 === t2) {
+        showToast('k₁, k₂ ve Kelvin cinsinden farklı pozitif sıcaklıklar girin.', 'warning');
+        return;
+    }
+    const gasConstant = 8.31446261815324;
+    const activationEnergy = gasConstant * Math.log(k2 / k1) / (1 / t1 - 1 / t2);
+    const preExponential = k1 * Math.exp(activationEnergy / (gasConstant * t1));
+    const signNote = activationEnergy < 0 ? '<p class="text-amber-300">Not: Negatif Eₐ değeri, hız sabitinin sıcaklıkla beklenmedik yönde değiştiğini gösterir; verileri kontrol edin.</p>' : '';
+    result.innerHTML = `<p><span class="text-slate-400">Aktivasyon enerjisi Eₐ:</span> <strong class="text-orange-300">${(activationEnergy / 1000).toFixed(4)} kJ·mol⁻¹</strong></p>
+        <p><span class="text-slate-400">Ön-üstel faktör A:</span> <strong class="text-orange-300">${preExponential.toExponential(5)}</strong></p>
+        <p class="text-[10px] text-slate-500 font-mono mt-1">Eₐ = R·ln(k₂/k₁) / (1/T₁ − 1/T₂), R = 8.314462618 J·mol⁻¹·K⁻¹</p>${signNote}`;
+    result.classList.remove('hidden');
+}
+
 // Jablonski Diyagramı ve Foton Enerjisi Hesaplayıcısı
 function calculateJablonskiDiagram() {
     const fields = {
