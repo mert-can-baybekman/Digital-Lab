@@ -208,8 +208,12 @@ const chartStyleTargets = [
     ['dsc-plotly-chart', 'DSC'],
     ['gpc-plotly-chart', 'GPC']
 ];
+const chartStyleStorageKey = 'digital_lab_chart_styles';
+const chartStyleState = {};
 
 function initChartStyleControls() {
+    loadChartStyleState();
+    installChartReactStylePersistence();
     chartStyleTargets.forEach(([chartId, label]) => {
         const chart = document.getElementById(chartId);
         if (!chart || chart.dataset.styleControls) return;
@@ -246,6 +250,15 @@ function initChartStyleControls() {
         const dash = toolbar.querySelector('[data-chart-dash]');
         const markers = toolbar.querySelector('[data-chart-markers]');
         const grid = toolbar.querySelector('[data-chart-grid]');
+        const savedStyle = chartStyleState[chartId];
+        if (savedStyle) {
+            color.value = savedStyle.color;
+            width.value = String(savedStyle.width);
+            widthValue.textContent = String(savedStyle.width);
+            dash.value = savedStyle.dash;
+            markers.checked = savedStyle.markers;
+            grid.checked = savedStyle.grid;
+        }
         const apply = () => applyChartStyle(chart, {
             color: color.value,
             width: Number(width.value),
@@ -254,14 +267,14 @@ function initChartStyleControls() {
             grid: grid.checked
         });
         width.addEventListener('input', () => {
-            widthValue.value = width.value;
+            widthValue.textContent = width.value;
             apply();
         });
         [color, dash, markers, grid].forEach(control => control.addEventListener('input', apply));
         toolbar.querySelector('[data-chart-reset]').addEventListener('click', () => {
             color.value = '#38bdf8';
             width.value = '2';
-            widthValue.value = '2';
+            widthValue.textContent = '2';
             dash.value = 'solid';
             markers.checked = false;
             grid.checked = true;
@@ -271,9 +284,46 @@ function initChartStyleControls() {
     });
 }
 
-function applyChartStyle(chart, style) {
+function loadChartStyleState() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(chartStyleStorageKey) || '{}');
+        if (saved && typeof saved === 'object') Object.assign(chartStyleState, saved);
+    } catch (error) {
+        // Grafik ayarları depolanamazsa varsayılanlar kullanılmaya devam eder.
+    }
+}
+
+function saveChartStyleState() {
+    try {
+        localStorage.setItem(chartStyleStorageKey, JSON.stringify(chartStyleState));
+    } catch (error) {
+        // Grafik stilleri yalnızca bu oturum için uygulanır.
+    }
+}
+
+function installChartReactStylePersistence() {
+    if (!window.Plotly || window.Plotly.__digitalLabStylePersistence) return;
+    const originalReact = window.Plotly.react.bind(window.Plotly);
+    window.Plotly.react = function (target, ...args) {
+        const result = originalReact(target, ...args);
+        const chart = typeof target === 'string' ? document.getElementById(target) : target;
+        const chartId = chart?.id;
+        const savedStyle = chartId ? chartStyleState[chartId] : null;
+        if (savedStyle && result && typeof result.then === 'function') {
+            result.then(() => applyChartStyle(chart, savedStyle, false));
+        }
+        return result;
+    };
+    window.Plotly.__digitalLabStylePersistence = true;
+}
+
+function applyChartStyle(chart, style, notify = true) {
+    if (chart?.id) {
+        chartStyleState[chart.id] = { ...style };
+        saveChartStyleState();
+    }
     if (!chart || !window.Plotly || !chart.data || !chart.data.length) {
-        showToast('Önce bu analizör için bir veri dosyası yükleyin.', 'info');
+        if (notify) showToast('Önce bu analizör için bir veri dosyası yükleyin.', 'info');
         return;
     }
     const lineIndices = chart.data
