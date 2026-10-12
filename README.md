@@ -112,6 +112,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 - **Doğrusal Regresyon & Kalibrasyon Eğrisi Analizi:** Standart veri setlerinden eğim, kesim noktası ve $R^2$ korelasyonunu hesaplama, bilinmeyen numune konsantrasyonunu bulma ve interaktif regresyon grafiği.
 - **Spektroskopi Birim Dönüştürücüsü:** Dalga boyu ($\text{nm}$) $\longleftrightarrow$ Dalga sayısı ($\text{cm}^{-1}$) $\longleftrightarrow$ Frekans ($\text{THz}$) $\longleftrightarrow$ Foton Enerjisi ($\text{eV}$) $\longleftrightarrow$ Molar Enerji ($\text{kJ/mol}$).
 - **İnteraktif IR Titreşim Korelasyon Tablosu:** Sık karşılaşılan tüm organik kimyasal bağların dalga sayıları ve bant özellikleri aranabilir veritabanı.
+- **Komut Paleti ve Hızlı Navigasyon:** `Ctrl/Cmd + K` ile tüm analizör ve dönüştürücüler aranabilir; son kullanılan modüller tarayıcıda hatırlanır ve `Esc` ile panel kapatılır.
 
 ---
 

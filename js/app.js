@@ -5,6 +5,7 @@
 // Global Uygulama Durumu
 const DigitalLab = {
     currentTab: 'hub',
+    recentTabs: [],
     stats: {
         spectraAnalyzed: 0,
         filesConverted: 0,
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initCSVConverterModule === 'function') initCSVConverterModule();
     if (typeof initXLSXConverterModule === 'function') initXLSXConverterModule();
     if (typeof initCalculatorsModule === 'function') initCalculatorsModule();
+    initCommandPalette();
 });
 
 // Tab / Router Sistemi
@@ -46,6 +48,7 @@ function switchTab(tabId, updateHash = true) {
     if (!validTabs.includes(tabId)) tabId = 'hub';
 
     DigitalLab.currentTab = tabId;
+    rememberRecentTab(tabId);
 
     if (updateHash) {
         window.location.hash = tabId;
@@ -67,9 +70,11 @@ function switchTab(tabId, updateHash = true) {
         if (target === tabId) {
             btn.classList.add('bg-indigo-600', 'text-white', 'shadow-md', 'shadow-indigo-600/30');
             btn.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60');
+            btn.setAttribute('aria-current', 'page');
         } else {
             btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-md', 'shadow-indigo-600/30');
             btn.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60');
+            btn.removeAttribute('aria-current');
         }
     });
 
@@ -88,10 +93,110 @@ function switchTab(tabId, updateHash = true) {
         } else if (tabId === 'gpc' && document.getElementById('gpc-plotly-chart')) {
             Plotly.Plots.resize('gpc-plotly-chart');
         }
+
     }, 100);
 
     lucide.createIcons();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const commandPaletteModules = [
+    { id: 'hub', name: 'Ana Sayfa / Hub', keywords: 'dashboard modüller araçlar' },
+    { id: 'ftir', name: 'FTIR Spektrum Maker', keywords: 'ftir infrared kızılötesi pik gürültü' },
+    { id: 'uvvis', name: 'UV-Vis Spektrum Maker', keywords: 'uv vis absorbans lambda max renk' },
+    { id: 'fluorescence', name: 'Floresans Spektrum Maker', keywords: 'floresans emisyon ölçek çarpanı' },
+    { id: 'xrdml', name: 'XRD Difraktogram Analizörü', keywords: 'xrd xrdml difraksiyon fwhm d aralığı' },
+    { id: 'dsc', name: 'DSC Termal Analizörü', keywords: 'dsc termal sıcaklık cam geçişi' },
+    { id: 'gpc', name: 'GPC Kromatogram Analizörü', keywords: 'gpc kromatografi polimer molekül ağırlığı' },
+    { id: 'csv-converter', name: 'CSV Dönüştürücü', keywords: 'csv dosya dönüştürme' },
+    { id: 'xlsx-converter', name: 'CSV → Excel Dönüştürücü', keywords: 'excel xlsx tablo dönüştürme' },
+    { id: 'calculators', name: 'Bilimsel Hesaplayıcılar', keywords: 'jablonski beer lambert spektroskopi ir regresyon' }
+];
+
+function rememberRecentTab(tabId) {
+    if (tabId === 'hub') return;
+    DigitalLab.recentTabs = [tabId, ...DigitalLab.recentTabs.filter(id => id !== tabId)].slice(0, 4);
+    try {
+        localStorage.setItem('digital_lab_recent_tabs', JSON.stringify(DigitalLab.recentTabs));
+    } catch (error) {
+        // Tarayıcı depolaması kapalıysa navigasyon yine çalışmaya devam eder.
+    }
+}
+
+function initCommandPalette() {
+    const palette = document.getElementById('command-palette');
+    const input = document.getElementById('command-palette-input');
+    if (!palette || !input) return;
+
+    try {
+        const saved = JSON.parse(localStorage.getItem('digital_lab_recent_tabs') || '[]');
+        if (Array.isArray(saved)) DigitalLab.recentTabs = saved.filter(id => commandPaletteModules.some(module => module.id === id));
+    } catch (error) {
+        DigitalLab.recentTabs = [];
+    }
+
+    input.addEventListener('input', () => renderCommandPaletteResults(input.value));
+    palette.addEventListener('click', event => {
+        if (event.target === palette) closeCommandPalette();
+    });
+    document.addEventListener('keydown', event => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+            event.preventDefault();
+            openCommandPalette();
+        } else if (event.key === 'Escape' && !palette.classList.contains('hidden')) {
+            closeCommandPalette();
+        }
+    });
+}
+
+function renderCommandPaletteResults(query = '') {
+    const results = document.getElementById('command-palette-results');
+    if (!results) return;
+    const normalized = query.trim().toLocaleLowerCase('tr-TR');
+    const recentRank = new Map(DigitalLab.recentTabs.map((id, index) => [id, index]));
+    const matches = commandPaletteModules
+        .filter(module => !normalized || `${module.name} ${module.keywords}`.toLocaleLowerCase('tr-TR').includes(normalized))
+        .sort((a, b) => (recentRank.get(a.id) ?? 99) - (recentRank.get(b.id) ?? 99));
+
+    if (!matches.length) {
+        results.innerHTML = '<p class="px-3 py-5 text-center text-xs text-slate-500">Eşleşen modül bulunamadı.</p>';
+        return;
+    }
+    results.innerHTML = matches.map(module => {
+        const recent = recentRank.has(module.id);
+        return `<button type="button" data-command-tab="${module.id}" class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-slate-800 transition group" role="option">
+            <span class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center"><i data-lucide="${module.id === 'calculators' ? 'calculator' : module.id === 'hub' ? 'layout-grid' : 'flask-conical'}" class="w-4 h-4 text-indigo-400"></i></span>
+                <span><span class="block text-xs font-semibold text-slate-200 group-hover:text-white">${module.name}</span><span class="block text-[10px] text-slate-500">${module.keywords}</span></span>
+            </span>
+            ${recent ? '<span class="text-[10px] text-indigo-400">Son kullanılan</span>' : ''}
+        </button>`;
+    }).join('');
+    results.querySelectorAll('[data-command-tab]').forEach(button => {
+        button.addEventListener('click', () => {
+            switchTab(button.dataset.commandTab);
+            closeCommandPalette();
+        });
+    });
+    lucide.createIcons();
+}
+
+function openCommandPalette() {
+    const palette = document.getElementById('command-palette');
+    const input = document.getElementById('command-palette-input');
+    if (!palette || !input) return;
+    palette.classList.remove('hidden');
+    palette.classList.add('flex');
+    input.value = '';
+    renderCommandPaletteResults();
+    requestAnimationFrame(() => input.focus());
+}
+
+function closeCommandPalette() {
+    const palette = document.getElementById('command-palette');
+    if (!palette) return;
+    palette.classList.add('hidden');
+    palette.classList.remove('flex');
 }
 
 // Global Bildirim Toast Sistemi

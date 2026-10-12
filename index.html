@@ -115,6 +115,12 @@
 
                 <!-- Sağ Menü -->
                 <div class="flex items-center space-x-3">
+                    <button type="button" onclick="openCommandPalette()" aria-label="Modül arama panelini aç"
+                       class="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 px-3 py-1.5 rounded-lg transition shadow-sm">
+                        <i data-lucide="command" class="w-3.5 h-3.5"></i>
+                        <span>Hızlı Ara</span>
+                        <kbd class="text-[10px] font-mono text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">Ctrl K</kbd>
+                    </button>
                     <a href="https://github.com/mert-can-baybekman" target="_blank" rel="noopener noreferrer"
                        class="flex items-center space-x-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 px-3 py-1.5 rounded-lg transition shadow-sm">
                         <i data-lucide="github" class="w-4 h-4"></i>
@@ -2247,6 +2253,21 @@
         <span id="global-toast-message">Bildirim mesajı</span>
     </div>
 
+    <!-- Hızlı Modül Arama / Komut Paleti -->
+    <div id="command-palette" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] hidden items-start justify-center pt-[12vh] px-4" role="dialog" aria-modal="true" aria-labelledby="command-palette-title">
+        <div class="w-full max-w-xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden">
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-800">
+                <i data-lucide="search" class="w-4 h-4 text-indigo-400"></i>
+                <input id="command-palette-input" type="search" autocomplete="off" class="flex-1 bg-transparent outline-none text-sm text-slate-100 placeholder-slate-500" placeholder="Modül veya özellik ara..." aria-label="Modül ara">
+                <kbd class="text-[10px] text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">Esc</kbd>
+            </div>
+            <div class="px-3 py-2">
+                <p id="command-palette-title" class="px-2 py-1 text-[10px] uppercase tracking-wider text-slate-500">Modüller</p>
+                <div id="command-palette-results" class="max-h-[52vh] overflow-y-auto space-y-1" role="listbox"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Alt Bilgi / Footer -->
     <footer class="relative z-10 border-t border-slate-800/80 bg-slate-900/50 mt-auto py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -2259,7 +2280,7 @@
     </footer>
 
     <!-- Uygulama Betikleri -->
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=20261012"></script>
     <script src="js/ftir.js"></script>
     <script src="js/uvvis.js"></script>
     <script src="js/fluorescence.js"></script>
