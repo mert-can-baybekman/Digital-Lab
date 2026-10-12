@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initXLSXConverterModule === 'function') initXLSXConverterModule();
     if (typeof initCalculatorsModule === 'function') initCalculatorsModule();
     initCommandPalette();
+    initChartStyleControls();
 });
 
 // Tab / Router Sistemi
@@ -197,6 +198,100 @@ function closeCommandPalette() {
     if (!palette) return;
     palette.classList.add('hidden');
     palette.classList.remove('flex');
+}
+
+const chartStyleTargets = [
+    ['ftir-plotly-chart', 'FTIR'],
+    ['uvvis-plotly-chart', 'UV-Vis'],
+    ['fluorescence-plotly-chart', 'Floresans'],
+    ['xrdml-plotly-chart', 'XRD'],
+    ['dsc-plotly-chart', 'DSC'],
+    ['gpc-plotly-chart', 'GPC']
+];
+
+function initChartStyleControls() {
+    chartStyleTargets.forEach(([chartId, label]) => {
+        const chart = document.getElementById(chartId);
+        if (!chart || chart.dataset.styleControls) return;
+        const toolbar = document.createElement('div');
+        toolbar.className = 'chart-style-toolbar flex flex-wrap items-center gap-2 mb-2 px-1 py-2 rounded-lg bg-slate-950/50 border border-slate-800/80';
+        toolbar.innerHTML = `
+            <span class="text-[10px] font-semibold text-slate-400 flex items-center gap-1.5 mr-1">
+                <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-400"></i>${label} grafik ayarları
+            </span>
+            <label class="flex items-center gap-1 text-[10px] text-slate-400" title="Çizgi rengi">
+                <span>Renk</span><input type="color" data-chart-color value="#38bdf8" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+            </label>
+            <label class="flex items-center gap-1 text-[10px] text-slate-400">
+                <span>Kalınlık</span><input type="range" data-chart-width min="1" max="6" step="0.5" value="2" class="w-16 accent-indigo-500">
+                <output data-chart-width-value class="w-5 text-right font-mono text-slate-300">2</output>
+            </label>
+            <select data-chart-dash class="bg-slate-900 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-1" title="Çizgi tipi">
+                <option value="solid">Düz</option><option value="dash">Kesikli</option><option value="dot">Noktalı</option><option value="dashdot">Karma</option>
+            </select>
+            <label class="flex items-center gap-1 text-[10px] text-slate-400">
+                <input type="checkbox" data-chart-markers class="accent-indigo-500"> Noktalar
+            </label>
+            <label class="flex items-center gap-1 text-[10px] text-slate-400">
+                <input type="checkbox" data-chart-grid checked class="accent-indigo-500"> Izgara
+            </label>
+            <button type="button" data-chart-reset class="ml-auto text-[10px] text-slate-400 hover:text-white border border-slate-700 rounded px-2 py-1 transition">Sıfırla</button>
+        `;
+        chart.parentElement.insertBefore(toolbar, chart);
+        chart.dataset.styleControls = 'true';
+
+        const color = toolbar.querySelector('[data-chart-color]');
+        const width = toolbar.querySelector('[data-chart-width]');
+        const widthValue = toolbar.querySelector('[data-chart-width-value]');
+        const dash = toolbar.querySelector('[data-chart-dash]');
+        const markers = toolbar.querySelector('[data-chart-markers]');
+        const grid = toolbar.querySelector('[data-chart-grid]');
+        const apply = () => applyChartStyle(chart, {
+            color: color.value,
+            width: Number(width.value),
+            dash: dash.value,
+            markers: markers.checked,
+            grid: grid.checked
+        });
+        width.addEventListener('input', () => {
+            widthValue.value = width.value;
+            apply();
+        });
+        [color, dash, markers, grid].forEach(control => control.addEventListener('input', apply));
+        toolbar.querySelector('[data-chart-reset]').addEventListener('click', () => {
+            color.value = '#38bdf8';
+            width.value = '2';
+            widthValue.value = '2';
+            dash.value = 'solid';
+            markers.checked = false;
+            grid.checked = true;
+            apply();
+        });
+        lucide.createIcons();
+    });
+}
+
+function applyChartStyle(chart, style) {
+    if (!chart || !window.Plotly || !chart.data || !chart.data.length) {
+        showToast('Önce bu analizör için bir veri dosyası yükleyin.', 'info');
+        return;
+    }
+    const lineIndices = chart.data
+        .map((trace, index) => ({ trace, index }))
+        .filter(({ trace }) => String(trace.mode || '').includes('lines'))
+        .map(({ index }) => index);
+    if (lineIndices.length) {
+        Plotly.restyle(chart, {
+            'line.color': style.color,
+            'line.width': style.width,
+            'line.dash': style.dash,
+            mode: style.markers ? 'lines+markers' : 'lines'
+        }, lineIndices);
+    }
+    Plotly.relayout(chart, {
+        'xaxis.showgrid': style.grid,
+        'yaxis.showgrid': style.grid
+    });
 }
 
 // Global Bildirim Toast Sistemi
