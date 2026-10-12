@@ -188,7 +188,10 @@
                         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
                         <input type="text" id="hub-search-input" placeholder="Laboratuvar modülü veya özellik ara..." 
                                class="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                               onkeyup="filterHubCards()">
+                               oninput="filterHubCards()" aria-label="Laboratuvar modülü ara">
+                        <button type="button" id="hub-search-clear" onclick="clearHubSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white rounded transition" aria-label="Aramayı temizle">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2249,6 +2252,10 @@
         <i id="global-toast-icon" data-lucide="info" class="w-4 h-4 text-indigo-400 shrink-0"></i>
         <span id="global-toast-message">Bildirim mesajı</span>
     </div>
+
+    <button type="button" id="scroll-top-button" onclick="scrollToTop()" class="fixed bottom-5 left-5 hidden items-center justify-center w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition z-40" aria-label="Sayfanın başına dön" title="Yukarı çık">
+        <i data-lucide="arrow-up" class="w-4 h-4"></i>
+    </button>
 
     <!-- Hızlı Modül Arama / Komut Paleti -->
     <div id="command-palette" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] hidden items-start justify-center pt-[12vh] px-4" role="dialog" aria-modal="true" aria-labelledby="command-palette-title">

@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initCalculatorsModule === 'function') initCalculatorsModule();
     initCommandPalette();
     initChartStyleControls();
+    initGlobalNavigationShortcuts();
 });
 
 // Tab / Router Sistemi
@@ -219,6 +220,40 @@ function closeCommandPalette() {
     if (!palette) return;
     palette.classList.add('hidden');
     palette.classList.remove('flex');
+}
+
+function initGlobalNavigationShortcuts() {
+    const hubSearch = document.getElementById('hub-search-input');
+    const scrollButton = document.getElementById('scroll-top-button');
+    if (hubSearch && !hubSearch.dataset.shortcutsBound) {
+        hubSearch.dataset.shortcutsBound = 'true';
+        hubSearch.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                clearHubSearch();
+                hubSearch.blur();
+            }
+        });
+    }
+    window.addEventListener('scroll', () => {
+        if (!scrollButton) return;
+        const visible = window.scrollY > 360;
+        scrollButton.classList.toggle('hidden', !visible);
+        scrollButton.classList.toggle('flex', visible);
+    }, { passive: true });
+}
+
+function clearHubSearch() {
+    const input = document.getElementById('hub-search-input');
+    const clearButton = document.getElementById('hub-search-clear');
+    if (!input) return;
+    input.value = '';
+    filterHubCards();
+    input.focus();
+    clearButton?.classList.add('hidden');
+}
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 const chartStyleTargets = [
@@ -486,6 +521,7 @@ function sendCSVToXLSX(csvContent, fileName) {
 // Hub Filtreleme
 function filterHubCards() {
     const query = (document.getElementById('hub-search-input')?.value || '').toLowerCase().trim();
+    document.getElementById('hub-search-clear')?.classList.toggle('hidden', query.length === 0);
     const cards = document.querySelectorAll('.hub-tool-card');
     let count = 0;
 

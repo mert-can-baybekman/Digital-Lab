@@ -114,6 +114,7 @@ Tüm işlemler **%100 istemci tarafında (tarayıcınızda)** gerçekleşir; hi�
 - **İnteraktif IR Titreşim Korelasyon Tablosu:** Sık karşılaşılan tüm organik kimyasal bağların dalga sayıları ve bant özellikleri aranabilir veritabanı.
 - **Komut Paleti ve Hızlı Navigasyon:** `Ctrl/Cmd + K` ile tüm analizör ve dönüştürücüler aranabilir; son kullanılan modüller tarayıcıda hatırlanır ve `Esc` ile panel kapatılır.
 - **Klavye ile Komut Paleti Kullanımı:** Arama sonuçları `↑/↓` ile seçilebilir, `Enter` ile açılabilir; seçili sonuç görsel olarak vurgulanır ve erişilebilirlik durumları güncellenir.
+- **Hub Arama Kısayolu ve Yukarı Çık:** Hub araması `Esc` ile temizlenebilir; uzun sayfalarda görünür olan yukarı çık düğmesiyle başa dönülebilir.
 - **Ortak Grafik Stil Araç Çubuğu:** FTIR, UV-Vis, Floresans, XRD, DSC ve GPC grafiklerinde çizgi rengi, kalınlığı, çizgi tipi, nokta görünümü ve ızgara görünümü veri yüklenmeden önce veya sonra kolayca değiştirilebilir.
 
 ---
